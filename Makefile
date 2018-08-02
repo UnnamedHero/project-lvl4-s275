@@ -1,5 +1,5 @@
 start:
-	DEBUG="app:*" npm run nodemon -- --watch .  --ext '.js' --exec npm run gulp -- server
+	DEBUG="app:*" npm run nodemon -- --watch .  --ext '.js' --ext '.pug' --exec npm run gulp -- server
 
 lint:
 	npm run lint .
