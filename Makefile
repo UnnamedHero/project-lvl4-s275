@@ -3,5 +3,8 @@ start:
 
 test:
 	npm test
-						
+
+publish:
+  git push heroku master
+	
 .PHONY: test
