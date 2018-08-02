@@ -2,7 +2,7 @@
   "name": "eem-task-tracker",
   "version": "0.0.3",
   "description": "Hexlet backend project #4",
-  "main": "dist/index.js",
+  "main": "index.js",
   "engines": {
     "node": "9"
   },
