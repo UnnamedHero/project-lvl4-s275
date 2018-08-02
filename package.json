@@ -10,10 +10,11 @@
     "test": "jest",
     "gulp": "gulp",
     "nodemon": "nodemon",
-    "start": "npm run build && gulp server",
+    "start": "gulp server",
     "lint": "eslint",
     "webpack": "webpack",
-    "build": "npm run webpack -- -p --env production && babel src --out-dir dist --source-maps inline"
+    "build": "npm run webpack -- -p --env production && babel src --out-dir dist --source-maps inline",
+    "postinstall": "npm run build"
   },
   "jest": {
     "testEnvironment": "node"
