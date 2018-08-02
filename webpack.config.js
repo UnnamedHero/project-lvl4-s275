@@ -3,7 +3,7 @@ const mode = process.env.NODE_ENV;
 module.exports = {
   mode: mode === 'production' ? mode : 'development',
   entry: {
-    app: ['@babel/polyfill', './src/index.js'],
+    app: ['./src/index.js'],
   },
   output: {
     publicPath: '/assets/',
