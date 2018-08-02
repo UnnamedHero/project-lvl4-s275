@@ -65,6 +65,7 @@
     "gulp": "^4.0.0",
     "jest": "^23.4.2",
     "nodemon": "^1.18.3",
+    "sqlite3": "^4.0.2",
     "webpack-cli": "^3.1.0"
   },
   "dependencies": {
@@ -84,8 +85,11 @@
     "koa-static": "^5.0.0",
     "koa-webpack": "^5.1.0",
     "lodash": "^4.17.10",
+    "pg": "^7.4.3",
+    "pg-hstore": "^2.3.2",
     "popper.js": "^1.14.3",
     "rollbar": "^2.4.4",
+    "sequelize": "^4.38.0",
     "style-loader": "^0.21.0",
     "webpack": "^4.16.3"
   }
