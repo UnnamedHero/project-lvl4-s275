@@ -5,6 +5,6 @@ test:
 	npm test
 
 publish:
-  git push heroku master
+	git push heroku master
 	
 .PHONY: test
