@@ -3,11 +3,14 @@
   "version": "0.0.3",
   "description": "Hexlet backend project #4",
   "main": "index.js",
+  "engines": {
+    "node": "9"
+  },
   "scripts": {
     "test": "jest",
     "gulp": "gulp",
     "nodemon": "nodemon",
-    "start": "gulp server",
+    "start": "npm run build && gulp server",
     "lint": "eslint",
     "webpack": "webpack",
     "build": "npm run webpack -- -p --env production && babel src --out-dir dist --source-maps inline"
