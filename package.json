@@ -8,7 +8,9 @@
     "gulp": "gulp",
     "nodemon": "nodemon",
     "start": "gulp server",
-    "lint": "eslint"
+    "lint": "eslint",
+    "webpack": "webpack",
+    "build": "npm run webpack -- -p --env production && babel src --out-dir dist --source-maps inline"
   },
   "repository": {
     "type": "git",
@@ -48,6 +50,7 @@
     "@babel/preset-flow": "^7.0.0-beta.55",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^8.2.6",
+    "babel-loader": "^7.1.5",
     "eslint": "^5.2.0",
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-babel": "^5.1.0",
@@ -56,9 +59,10 @@
     "eslint-plugin-jest": "^21.18.0",
     "flow": "^0.2.3",
     "flow-typed": "^2.5.1",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "jest": "^23.4.2",
-    "nodemon": "^1.18.3"
+    "nodemon": "^1.18.3",
+    "webpack-cli": "^3.1.0"
   },
   "dependencies": {
     "@babel/polyfill": "^7.0.0-beta.55",
