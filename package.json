@@ -1,6 +1,6 @@
 {
   "name": "eem-task-tracker",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Hexlet backend project #4",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,9 @@
     "lint": "eslint",
     "webpack": "webpack",
     "build": "npm run webpack -- -p --env production && babel src --out-dir dist --source-maps inline"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "repository": {
     "type": "git",

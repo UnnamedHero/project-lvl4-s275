@@ -1,12 +1,13 @@
 ### Hexlet education project. JS BackEnd. Task Manager
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/b1fca4db535191489327/maintainability)](https://codeclimate.com/github/UnnamedHero/project-lvl4-s275/maintainability)
-
 [![Build Status](https://travis-ci.org/UnnamedHero/project-lvl4-s275.svg?branch=master)](https://travis-ci.org/UnnamedHero/project-lvl4-s275)
 
 Live demo: http://eem-task-manager.herokuapp.com/
 
-Цель этого проекта, проработка прикладных инструментов веб-разработчика. Фреймворки, базы данных, orm. Темы:
+Цель этого проекта, проработка прикладных инструментов веб-разработчика. Фреймворки, базы данных, orm. 
+
+#### Темы:
 
  - Проектирование. Отображение предметной области на хранилище, одна из ключевых задач при разработке. Нормализация (и Денормализация) базы данных, связи между сущностями, все это входит в задачи по проектированию.
  - Heroku (PaaS). Разработка, это только половина дела. Доставка до рабочего окружения и запуск проекта не менее важная задача.
