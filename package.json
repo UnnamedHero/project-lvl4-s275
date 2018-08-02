@@ -7,7 +7,8 @@
     "test": "jest",
     "gulp": "gulp",
     "nodemon": "nodemon",
-    "start": "gulp server"
+    "start": "gulp server",
+    "lint": "eslint"
   },
   "repository": {
     "type": "git",
