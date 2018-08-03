@@ -6,9 +6,12 @@ import Router from 'koa-router';
 import Rollbar from 'rollbar';
 import koaWebpack from 'koa-webpack';
 import Pug from 'koa-pug';
+import bodyParser from 'koa-bodyparser';
 import flash from 'koa-flash-simple';
 import session from 'koa-generic-session';
 import serve from 'koa-static';
+import methodOverride from 'koa-methodoverride';
+import koaLogger from 'koa-logger';
 import _ from 'lodash';
 
 import container from './container';
@@ -18,6 +21,7 @@ import webpackConfig from './webpack.config';
 const isDevEnv = process.env.NODE_ENV === 'development';
 
 export default () => {
+  console.log(`--mode: ${process.env.NODE_ENV}`);
   const app = new Koa();
   app.keys = ['why are you reading me?'];
 
@@ -43,7 +47,9 @@ export default () => {
     };
     await next();
   });
-  console.log('-----------------------', isDevEnv, process.env.NODE_ENV);
+
+  app.use(bodyParser());
+
   if (isDevEnv) {
     koaWebpack({
       config: webpackConfig,
@@ -52,6 +58,15 @@ export default () => {
     });
   }
 
+  app.use(koaLogger());
+  app.use(methodOverride((req, res) => {
+    console.log(req.body, res);
+    if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+      return req.body._method; // eslint-disable-line
+    }
+    return null;
+  }));
+  // app.use(methodOverride('_method'));
   app.use(serve(path.join(__dirname, 'dist')));
 
   const router = new Router();
