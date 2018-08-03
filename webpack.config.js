@@ -1,11 +1,12 @@
+const path = require('path');
+
 const mode = process.env.NODE_ENV;
 
 module.exports = {
   mode: mode === 'production' ? mode : 'development',
-  entry: {
-    app: ['@babel/polyfill', './src/index.js'],
-  },
+  entry: ['./src/index.js'],
   output: {
+    path: path.join(__dirname, 'dist', 'assets'),
     publicPath: '/assets/',
   },
   module: {
