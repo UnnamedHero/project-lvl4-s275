@@ -1,10 +1,14 @@
 const path = require('path');
+// const webpack = require('webpack');
 
 const mode = process.env.NODE_ENV;
 
 module.exports = {
   mode: mode === 'production' ? mode : 'development',
-  entry: ['./src/index.js'],
+  entry: {
+    app: ['./src/index.js'],
+    vendor: ['jquery-ujs'],
+  },
   output: {
     path: path.join(__dirname, 'dist', 'assets'),
     publicPath: '/assets/',
@@ -22,12 +26,12 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    // new webpack.ProvidePlugin({
-    //   $: 'jquery',
-    //   jQuery: 'jquery',
-    //   'window.jQuery': 'jquery',
-    //   Popper: ['popper.js', 'default'],
-    // }),
-  ],
+  // plugins: [
+  //   new webpack.ProvidePlugin({
+  //     $: 'jquery',
+  //     jQuery: 'jquery',
+  //     'window.jQuery': 'jquery',
+  //     Popper: ['popper.js', 'default'],
+  //   }),
+  // ],
 };
