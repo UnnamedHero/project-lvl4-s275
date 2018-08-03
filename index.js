@@ -15,6 +15,8 @@ import container from './container';
 import addRoutes from './routes';
 import webpackConfig from './webpack.config';
 
+const isDevEnv = process.env.NODE_ENV === 'development';
+
 export default () => {
   const app = new Koa();
   app.keys = ['why are you reading me?'];
@@ -41,8 +43,8 @@ export default () => {
     };
     await next();
   });
-
-  if (process.env.NODE_ENV !== 'production') {
+  console.log('-----------------------', isDevEnv, process.env.NODE_ENV);
+  if (isDevEnv) {
     koaWebpack({
       config: webpackConfig,
     }).then((middleware) => {
@@ -50,7 +52,7 @@ export default () => {
     });
   }
 
-  app.use(serve(path.join(__dirname, '..', 'public')));
+  app.use(serve(path.join(__dirname, 'dist')));
 
   const router = new Router();
   addRoutes(router, container);
@@ -59,7 +61,7 @@ export default () => {
 
   const pug = new Pug({
     viewPath: './views',
-    noCache: process.env.NODE_ENV === 'development',
+    noCache: isDevEnv,
     debug: true,
     pretty: true,
     compileDebug: true,

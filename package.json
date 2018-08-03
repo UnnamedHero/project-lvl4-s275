@@ -13,7 +13,7 @@
     "start": "gulp server",
     "lint": "eslint",
     "webpack": "webpack",
-    "build": "npm run webpack -- -p --env production && babel src --out-dir dist --source-maps inline",
+    "build": "npm run webpack -- -p --env production",
     "postinstall": "npm run build"
   },
   "jest": {
