@@ -1,6 +1,6 @@
 // @flow
 import '@babel/polyfill';
-// import path from 'path';
+import path from 'path';
 import Koa from 'koa';
 import Router from 'koa-router';
 import Rollbar from 'rollbar';
@@ -8,11 +8,14 @@ import koaWebpack from 'koa-webpack';
 import Pug from 'koa-pug';
 import flash from 'koa-flash-simple';
 import session from 'koa-generic-session';
+import serve from 'koa-static';
 import _ from 'lodash';
 
 import container from './container';
 import addRoutes from './routes';
 import webpackConfig from './webpack.config';
+
+const isDevEnv = process.env.NODE_ENV === 'development';
 
 export default () => {
   const app = new Koa();
@@ -40,14 +43,16 @@ export default () => {
     };
     await next();
   });
-
-  if (process.env.NODE_ENV !== 'production') {
+  console.log('-----------------------', isDevEnv, process.env.NODE_ENV);
+  if (isDevEnv) {
     koaWebpack({
       config: webpackConfig,
     }).then((middleware) => {
       app.use(middleware);
     });
   }
+
+  app.use(serve(path.join(__dirname, 'dist')));
 
   const router = new Router();
   addRoutes(router, container);
@@ -56,7 +61,7 @@ export default () => {
 
   const pug = new Pug({
     viewPath: './views',
-    noCache: process.env.NODE_ENV === 'development',
+    noCache: isDevEnv,
     debug: true,
     pretty: true,
     compileDebug: true,
