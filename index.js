@@ -1,6 +1,6 @@
 // @flow
 import '@babel/polyfill';
-// import path from 'path';
+import path from 'path';
 import Koa from 'koa';
 import Router from 'koa-router';
 import Rollbar from 'rollbar';
@@ -8,6 +8,7 @@ import koaWebpack from 'koa-webpack';
 import Pug from 'koa-pug';
 import flash from 'koa-flash-simple';
 import session from 'koa-generic-session';
+import serve from 'koa-static';
 import _ from 'lodash';
 
 import container from './container';
@@ -48,6 +49,8 @@ export default () => {
       app.use(middleware);
     });
   }
+
+  app.use(serve(path.join(__dirname, '..', 'public')));
 
   const router = new Router();
   addRoutes(router, container);
