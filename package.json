@@ -14,7 +14,8 @@
     "lint": "eslint",
     "webpack": "webpack",
     "build": "npm run webpack -- -p --env production",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "sequelize": "sequelize"
   },
   "jest": {
     "testEnvironment": "node"
@@ -35,7 +36,6 @@
   "devDependencies": {
     "@babel/preset-flow": "^7.0.0-beta.55",
     "babel-eslint": "^8.2.6",
-    "babel-loader": "^7.1.5",
     "eslint": "^5.2.0",
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-babel": "^5.1.0",
@@ -72,10 +72,14 @@
     "@babel/polyfill": "^7.0.0-beta.55",
     "@babel/preset-env": "^7.0.0-beta.55",
     "babel-core": "^7.0.0-bridge.0",
+    "babel-loader": "^8.0.0-beta.4",
     "bootstrap": "^4.1.3",
+    "bottlejs": "^1.7.1",
     "css-loader": "^1.0.0",
     "debug": "^3.1.0",
     "dotenv": "^6.0.0",
+    "jquery": "^3.3.1",
+    "jquery-ujs": "^1.2.2",
     "koa": "^2.5.2",
     "koa-bodyparser": "^4.2.1",
     "koa-flash-simple": "0.0.3",
@@ -92,6 +96,8 @@
     "popper.js": "^1.14.3",
     "rollbar": "^2.4.4",
     "sequelize": "^4.38.0",
+    "sequelize-cli": "^4.0.0",
+    "sqlite3": "^4.0.2",
     "style-loader": "^0.21.0",
     "webpack": "^4.16.3",
     "webpack-cli": "^3.1.0"
