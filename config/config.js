@@ -8,10 +8,10 @@ module.exports = {
     dialect: 'sqlite',
   },
   production: {
-    use_env_variable: 'DATABASE_URL',
-    dialect: 'postgres',
-    dialectOptions: {
-      ssl: true,
-    },
+    username: 'root',
+    password: null,
+    database: 'database_production',
+    host: '127.0.0.1',
+    dialect: 'mysql',
   },
 };
