@@ -4,18 +4,10 @@ const Sequelize = require('sequelize');
 
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(`${__dirname}/../config/config.json`)[env]; //eslint-disable-line
+const config = require(`${__dirname}/../config/config.js`)[env]; //eslint-disable-line
 const db = {};
 
-let sequelize;
-if (config.use_env_variable) {
-  const database = process.env.DATABASE;
-  const username = process.env.DB_USER;
-  const password = process.env.DB_PASSWORD;
-  sequelize = new Sequelize(database, username, password, config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
+const sequelize = new Sequelize(config.database, config.username, config.password, config);
 
 fs
   .readdirSync(__dirname)
