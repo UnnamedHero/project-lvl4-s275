@@ -1,6 +1,6 @@
 {
   "name": "eem-task-tracker",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Hexlet backend project #4",
   "main": "index.js",
   "engines": {
