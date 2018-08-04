@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import Sequelize from 'sequelize';
-import config from '../config/config';
+import config from '../config/config'; //eslint-disable-line
 
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';

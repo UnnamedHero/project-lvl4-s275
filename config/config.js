@@ -1,6 +1,6 @@
 const uri = process.env.DATABASE_URL || {};
 
-export default {
+module.exports = {
   development: {
     storage: './db.development.sqlite',
     dialect: 'sqlite',
