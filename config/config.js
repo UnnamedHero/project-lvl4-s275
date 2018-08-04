@@ -1,8 +1,3 @@
-const uriParser = require('parse-database-url');
-
-const uri = process.env.DATABASE_URL || '';
-const productionConfig = uriParser(uri);
-
 module.exports = {
   development: {
     storage: './db.development.sqlite',
@@ -13,7 +8,7 @@ module.exports = {
     dialect: 'sqlite',
   },
   production: {
-    ...productionConfig,
+    use_env_variable: 'DATABASE_URL',
     dialect: 'postgres',
     dialectOptions: {
       ssl: true,

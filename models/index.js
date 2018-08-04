@@ -7,7 +7,6 @@ const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const actualConfig = config[env];
 const db = {};
-console.log(env, config);
 
 const sequelize = new Sequelize(actualConfig);
 
