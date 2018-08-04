@@ -1,13 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
+import fs from 'fs';
+import path from 'path';
+import Sequelize from 'sequelize';
+import config from '../config/config';
 
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(`${__dirname}/../config/config.js`)[env]; //eslint-disable-line
+const actualConfig = config[env];
 const db = {};
+console.log(env, config);
 
-const sequelize = new Sequelize(config);
+const sequelize = new Sequelize(actualConfig);
 
 fs
   .readdirSync(__dirname)
