@@ -59,14 +59,12 @@ export default () => {
   }
 
   app.use(koaLogger());
-  app.use(methodOverride((req, res) => {
-    console.log(req.body, res);
+  app.use(methodOverride((req) => {
     if (req.body && typeof req.body === 'object' && '_method' in req.body) {
       return req.body._method; // eslint-disable-line
     }
     return null;
   }));
-  // app.use(methodOverride('_method'));
   app.use(serve(path.join(__dirname, 'dist')));
 
   const router = new Router();

@@ -1,18 +1,17 @@
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
+import fs from 'fs';
+import path from 'path';
+import Sequelize from 'sequelize';
+import configFile from '../config/config'; //eslint-disable-line
 
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
-const config = require(`${__dirname}/../config/config.json`)[env]; //eslint-disable-line
+const config = configFile[env];
 const db = {};
 
 let sequelize;
+
 if (config.use_env_variable) {
-  const database = process.env.DATABASE;
-  const username = process.env.DB_USER;
-  const password = process.env.DB_PASSWORD;
-  sequelize = new Sequelize(database, username, password, config);
+  sequelize = new Sequelize(process.env[config.use_env_variable]);
 } else {
   sequelize = new Sequelize(config.database, config.username, config.password, config);
 }
