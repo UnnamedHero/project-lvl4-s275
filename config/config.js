@@ -1,5 +1,5 @@
 const uri = process.env.DATABASE_URL || {};
-
+console.log(uri);
 module.exports = {
   development: {
     storage: './db.development.sqlite',
