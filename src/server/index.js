@@ -4,7 +4,7 @@ import path from 'path';
 import Koa from 'koa';
 import Router from 'koa-router';
 import Rollbar from 'rollbar';
-import koaWebpack from 'koa-webpack';
+// import koaWebpack from 'koa-webpack';
 import Pug from 'koa-pug';
 import bodyParser from 'koa-bodyparser';
 import flash from 'koa-flash-simple';
@@ -16,7 +16,7 @@ import _ from 'lodash';
 
 import container from './container';
 import addRoutes from './routes';
-import webpackConfig from '../../webpack.config.babel';
+// import webpackConfig from '../../webpack.config.babel';
 
 const isDevEnv = process.env.NODE_ENV === 'development';
 
@@ -40,6 +40,7 @@ export default () => {
 
   app.use(flash());
   app.use(async (ctx, next) => {
+    console.log('lol', ctx.session.flash);
     ctx.state = {
       flash: ctx.flash,
       isSignedIn: () => ctx.session.userId !== undefined,
@@ -49,14 +50,14 @@ export default () => {
 
   app.use(bodyParser());
 
-  if (isDevEnv) {
-    console.log('it is DEV TIME!!!!');
-    koaWebpack({
-      config: webpackConfig,
-    }).then((middleware) => {
-      app.use(middleware);
-    });
-  }
+  // if (isDevEnv) {
+  //   console.log('it is DEV TIME!!!!');
+  //   koaWebpack({
+  //     config: webpackConfig,
+  //   }).then((middleware) => {
+  //     app.use(middleware);
+  //   });
+  // }
 
   app.use(koaLogger());
   app.use(methodOverride((req) => {
@@ -65,7 +66,7 @@ export default () => {
     }
     return null;
   }));
-  app.use(serve(path.join(__dirname, 'public')));
+  app.use(serve(path.resolve(__dirname, '..', '..', 'public')));
 
   const router = new Router();
   addRoutes(router, container);
