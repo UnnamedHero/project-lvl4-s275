@@ -9,5 +9,8 @@ test:
 
 publish:
 	git push heroku master
-	
+
+init-db:
+	npm run sequelize -- db:migrate
+
 .PHONY: test
