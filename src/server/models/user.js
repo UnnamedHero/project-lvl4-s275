@@ -1,4 +1,4 @@
-import { encrypt } from '../lib/secure';
+import { encrypt } from '../../lib/secure';
 
 export default (sequelize, DataTypes) => {
   const User = sequelize.define('User', {

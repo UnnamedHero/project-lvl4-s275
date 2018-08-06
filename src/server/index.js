@@ -16,12 +16,11 @@ import _ from 'lodash';
 
 import container from './container';
 import addRoutes from './routes';
-import webpackConfig from './webpack.config';
+import webpackConfig from '../../webpack.config.babel';
 
 const isDevEnv = process.env.NODE_ENV === 'development';
 
 export default () => {
-  console.log(`--mode: ${process.env.NODE_ENV}`);
   const app = new Koa();
   app.keys = ['why are you reading me?'];
 
@@ -51,6 +50,7 @@ export default () => {
   app.use(bodyParser());
 
   if (isDevEnv) {
+    console.log('it is DEV TIME!!!!');
     koaWebpack({
       config: webpackConfig,
     }).then((middleware) => {
@@ -65,7 +65,7 @@ export default () => {
     }
     return null;
   }));
-  app.use(serve(path.join(__dirname, 'dist')));
+  app.use(serve(path.join(__dirname, 'public')));
 
   const router = new Router();
   addRoutes(router, container);
@@ -73,13 +73,13 @@ export default () => {
   app.use(router.routes());
 
   const pug = new Pug({
-    viewPath: './views',
+    viewPath: path.join(__dirname, './views'),
     noCache: isDevEnv,
     debug: true,
     pretty: true,
     compileDebug: true,
     locals: [],
-    basedir: './views',
+    basedir: path.join(__dirname, './views'),
     helperPath: [
       { _ },
       { urlFor: (...args) => router.url(...args) },
