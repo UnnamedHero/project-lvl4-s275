@@ -1,16 +1,18 @@
-const path = require('path');
-const webpack = require('webpack');
+// TODO: move to babel.config
+import path from 'path';
+import webpack from 'webpack';
+import rimraf from 'rimraf';
 
 const mode = process.env.NODE_ENV;
 
-module.exports = {
+export default {
   mode: mode === 'production' ? mode : 'development',
   entry: {
-    app: ['./src/index.js'],
-    vendor: ['jquery-ujs'],
+    vendor: ['jquery-ujs', 'bootstrap'],
+    app: ['./src/client/index.js'],
   },
   output: {
-    path: path.join(__dirname, 'dist', 'assets'),
+    path: path.join(__dirname, 'public', 'assets'),
     publicPath: '/assets/',
   },
   module: {
@@ -27,6 +29,11 @@ module.exports = {
     ],
   },
   plugins: [
+    {
+      apply: (compiler) => {
+        rimraf.sync(compiler.options.output.path);
+      },
+    },
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery',
