@@ -2,7 +2,7 @@ start:
 	DEBUG="app:*" NODE_ENV=development npm run nodemon -- --watch .  --ext '.js' --ext '.pug' --exec npm run gulp -- server
 
 lint:
-	npm run lint .
+	npm run lint ./src
 
 test:
 	npm test
