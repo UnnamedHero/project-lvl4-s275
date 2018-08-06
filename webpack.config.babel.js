@@ -1,4 +1,3 @@
-// TODO: move to babel.config
 import path from 'path';
 import webpack from 'webpack';
 import rimraf from 'rimraf';
