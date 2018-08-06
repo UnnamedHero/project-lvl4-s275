@@ -20,12 +20,10 @@ export default (router) => {
         ctx.redirect(router.url('root'));
         return;
       }
-      console.log('bad login data');
       ctx.flash.set('email or password were wrong');
       ctx.render('sessions/new', { f: buildFormObj({ email }) });
     })
     .delete('session', '/session', (ctx) => {
-      console.log('--delete session');
       ctx.session = {};
       ctx.redirect(router.url('root'));
     });
