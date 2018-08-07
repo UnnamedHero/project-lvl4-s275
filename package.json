@@ -79,6 +79,8 @@
     "css-loader": "^1.0.0",
     "debug": "^3.1.0",
     "dotenv": "^6.0.0",
+    "jest-cli": "^23.4.2",
+    "jest-supertest-matchers": "0.0.1",
     "jquery": "^3.3.1",
     "jquery-ujs": "^1.2.2",
     "koa": "^2.5.2",
@@ -101,6 +103,7 @@
     "sequelize-cli": "^4.0.0",
     "sqlite3": "^4.0.2",
     "style-loader": "^0.21.0",
+    "supertest": "^3.1.0",
     "webpack": "^4.16.3",
     "webpack-cli": "^3.1.0"
   }
