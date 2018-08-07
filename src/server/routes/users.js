@@ -11,6 +11,9 @@ export default (router) => {
       const user = User.build();
       ctx.render('users/new', { f: buildFormObj(user) });
     })
+    .get('editUser', '/user', (ctx) => {
+      ctx.redirect(router.url('root'));
+    })
     .post('users', '/users', async (ctx) => {
       const { form } = ctx.request.body;
       const user = User.build(form);
@@ -21,5 +24,9 @@ export default (router) => {
       } catch (e) {
         ctx.render('users/new', { f: buildFormObj(user, e) });
       }
+    })
+    .delete('deleteUser', '/user', (ctx) => {
+      ctx.redirect(router.url('root'));
     });
+  // .patch('changeUser', '/users/';
 };
