@@ -40,7 +40,6 @@ export default () => {
   // TODO: fix flash
   app.use(flash());
   app.use(async (ctx, next) => {
-    console.log('lol', ctx.session.flash);
     ctx.state = {
       flash: ctx.flash,
       isSignedIn: () => ctx.session.userId !== undefined,

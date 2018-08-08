@@ -11,10 +11,10 @@ publish:
 	git push heroku master
 
 test:
-	npm test
+	NODE_ENV=test npm test
 
 start:
 	npm run webpack -- -p --env development
-	DEBUG="koa-flash*" NODE_ENV=development npm run nodemon -- --watch './src/server' --ext '.js, .pug' --exec npm run gulp -- server
+	DEBUG="app:*" NODE_ENV=development npm run nodemon -- --watch './src/server' --ext '.js, .pug' --exec npm run gulp -- server
 
 .PHONY: test
