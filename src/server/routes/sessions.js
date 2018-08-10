@@ -21,7 +21,7 @@ export default (router, { logger }) => {
         logger(`${user.email} logged in, id: ${ctx.session.userId}`);
         return;
       }
-      logger(`${user.email} NOT logged in with password ${password}`);
+      logger(`user ${email} NOT logged in with password ${password}`);
       ctx.flash.set('email or password were wrong');
       ctx.render('sessions/new', { f: buildFormObj({ email }) });
     })
