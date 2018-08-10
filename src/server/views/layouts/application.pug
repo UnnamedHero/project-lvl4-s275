@@ -17,12 +17,14 @@ html(lang="en")
             li.nav-item.active
               a.nav-link(href=urlFor('users')) Users
           ul.navbar-nav
-            if !isSignedIn()
+            if isSignedIn()
               li.nav-item.dropdown
                 a.nav-link.dropdown-toggle#profileDropdown(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Profile
                 .dropdown-menu.position-absolute(aria-labelledby='profileDropdown')
-                  a.dropdown-item(href=urlFor('editUser')) Edit profile
-                  a.dropdown-item(href=urlFor('deleteUser') data-method='patch') Delete profile
+                  a.dropdown-item(href=urlFor('editCurrentUser')) Edit profile
+                  a.dropdown-item(href=urlFor('changeCurrentUserPassword')) Change password
+                  .dropdown-divider
+                  a.dropdown-item(href=urlFor('deleteCurrentUser') data-method='delete' rel='nofollow') Delete profile
                   .dropdown-divider
                   a.dropdown-item(href=urlFor('session') data-method='delete' rel='nofollow') Sign Out
             else

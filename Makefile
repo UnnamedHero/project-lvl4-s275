@@ -11,10 +11,13 @@ publish:
 	git push heroku master
 
 test:
-	NODE_ENV=test npm test
+	DEBUG="app" NODE_ENV=test npm test -- --runInBand
+
+watch:
+	DEBUG="app" NODE_ENV=test npm test -- --watch
 
 start:
 	npm run webpack -- -p --env development
-	DEBUG="app:*" NODE_ENV=development npm run nodemon -- --watch './src/server' --ext '.js, .pug' --exec npm run gulp -- server
+	DEBUG="app*" NODE_ENV=development npm run nodemon -- --watch './src/server' --ext '.js, .pug' --exec npm run gulp -- server
 
 .PHONY: test
