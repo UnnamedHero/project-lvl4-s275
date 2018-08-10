@@ -4,7 +4,7 @@ import path from 'path';
 import Koa from 'koa';
 import Router from 'koa-router';
 import Rollbar from 'rollbar';
-import koaWebpack from 'koa-webpack';
+// import koaWebpack from 'koa-webpack';
 import Pug from 'koa-pug';
 import bodyParser from 'koa-bodyparser';
 import flash from 'koa-flash-simple';
@@ -16,12 +16,11 @@ import _ from 'lodash';
 
 import container from './container';
 import addRoutes from './routes';
-import webpackConfig from './webpack.config';
+// import webpackConfig from '../../webpack.config.babel';
 
 const isDevEnv = process.env.NODE_ENV === 'development';
 
 export default () => {
-  console.log(`--mode: ${process.env.NODE_ENV}`);
   const app = new Koa();
   app.keys = ['why are you reading me?'];
 
@@ -38,7 +37,7 @@ export default () => {
       }
     });
   }
-
+  // TODO: fix flash
   app.use(flash());
   app.use(async (ctx, next) => {
     ctx.state = {
@@ -50,13 +49,14 @@ export default () => {
 
   app.use(bodyParser());
 
-  if (isDevEnv) {
-    koaWebpack({
-      config: webpackConfig,
-    }).then((middleware) => {
-      app.use(middleware);
-    });
-  }
+  // if (isDevEnv) {
+  //   console.log('it is DEV TIME!!!!');
+  //   koaWebpack({
+  //     config: webpackConfig,
+  //   }).then((middleware) => {
+  //     app.use(middleware);
+  //   });
+  // }
 
   app.use(koaLogger());
   app.use(methodOverride((req) => {
@@ -65,7 +65,7 @@ export default () => {
     }
     return null;
   }));
-  app.use(serve(path.join(__dirname, 'dist')));
+  app.use(serve(path.resolve(__dirname, '..', '..', 'public')));
 
   const router = new Router();
   addRoutes(router, container);
@@ -73,13 +73,13 @@ export default () => {
   app.use(router.routes());
 
   const pug = new Pug({
-    viewPath: './views',
+    viewPath: path.join(__dirname, './views'),
     noCache: isDevEnv,
     debug: true,
     pretty: true,
     compileDebug: true,
     locals: [],
-    basedir: './views',
+    basedir: path.join(__dirname, './views'),
     helperPath: [
       { _ },
       { urlFor: (...args) => router.url(...args) },
