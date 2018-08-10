@@ -3,7 +3,7 @@ import faker from 'faker';
 import matchers from 'jest-supertest-matchers';
 
 import app from '../src/server';
-import { User } from '../src/server/models'; //eslint-disable-line
+import { User, sequelize } from '../src/server/models'; //eslint-disable-line
 
 const getCookies = res => res.headers['set-cookie'][0]
   .split(',')
@@ -17,16 +17,14 @@ const makeUser = (userParams = {}) => ({
   ...userParams,
 });
 
-const signUpUser = async (server, user, password) => {
-  await request.agent(server)
-    .post('/users')
-    .send({
-      form: {
-        ...user,
-        password,
-      },
-    });
-};
+const signUpUser = async (server, user, password) => request.agent(server)
+  .post('/users')
+  .send({
+    form: {
+      ...user,
+      password,
+    },
+  });
 
 const signInUser = async (server, user, password) => request.agent(server)
   .post('/session')
@@ -48,7 +46,7 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-  await User.sync({ force: true });
+  await sequelize.sync({ force: true });
 });
 
 
