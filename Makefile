@@ -11,7 +11,7 @@ publish:
 	git push heroku master
 
 test:
-	DEBUG="app" NODE_ENV=test npm test
+	DEBUG="app" NODE_ENV=test npm test -- --runInBand
 
 watch:
 	DEBUG="app" NODE_ENV=test npm test -- --watch
