@@ -63,11 +63,11 @@ describe('Create user', () => {
   const twinUser = makeUser({ email: user.email });
 
   test('create', async () => {
-    await signUpUser(server, user, faker.internet.password);
+    await signUpUser(server, user, faker.internet.password());
     const expectedUser = await getUserBy({ email: user.email });
     expect(expectedUser).toMatchObject(user);
 
-    await signUpUser(server, twinUser, faker.internet.password);
+    await signUpUser(server, twinUser, faker.internet.password());
     const registeredUsers = await User.findAll();
     expect(registeredUsers).toHaveLength(1);
   });
