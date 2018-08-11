@@ -1,8 +1,12 @@
 console:
 		DEBUG="app:*" npm run gulp -- console
 
+
 init-db:
 	npm run sequelize -- db:migrate
+
+drop-db:
+	npm run sequelize -- db:drop
 
 lint:
 	npm run lint ./src
@@ -11,7 +15,7 @@ publish:
 	git push heroku master
 
 test:
-	DEBUG="app" NODE_ENV=test npm test -- --runInBand
+	DEBUG="app" NODE_ENV=test npm test
 
 watch:
 	DEBUG="app" NODE_ENV=test npm test -- --watch

@@ -18,7 +18,7 @@ export default (router, { logger }) => {
       const user = User.build();
       ctx.render('users/new', { f: buildFormObj(user) });
     })
-    .get('editCurrentUser', '/user', async (ctx) => {
+    .get('editCurrentUser', '/users/currentUser', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to edit your profile');
         ctx.redirect(router.url('root'));
@@ -27,7 +27,7 @@ export default (router, { logger }) => {
       const user = await getUserBy({ id: ctx.session.userId });
       ctx.render('users/edit', { f: buildFormObj(user), id: user.id });
     })
-    .get('changeCurrentUserPassword', '/user/password', async (ctx) => {
+    .get('changeCurrentUserPassword', '/users/currentUser/password', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to change your password');
         ctx.redirect(router.url('root'));
