@@ -27,7 +27,7 @@ export default (router, { logger }) => {
       const user = await getUserBy({ id: ctx.session.userId });
       ctx.render('users/edit', { f: buildFormObj(user), id: user.id });
     })
-    .get('changeCurrentUserPassword', '/user/password', async (ctx) => {
+    .get('changeCurrentUserPassword', '/users/currentUser/password', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to change your password');
         ctx.redirect(router.url('root'));
