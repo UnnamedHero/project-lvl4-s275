@@ -41,14 +41,14 @@ const getUserBy = async params => User.findOne({
   },
 });
 
-beforeAll(() => {
+beforeAll(async () => {
   jasmine.addMatchers(matchers);
+  await User.sync({ force: true });
 });
 
 beforeEach(async () => {
-  await sequelize.sync({ force: true });
+  await User.destroy({ where: {}, force: true });
 });
-
 
 describe('Create user', () => {
   let server;
@@ -177,4 +177,8 @@ describe('Edit user', () => {
     server.close();
     done();
   });
+});
+
+afterAll(async () => {
+  await sequelize.close();
 });
