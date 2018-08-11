@@ -1,4 +1,4 @@
-import { encrypt } from '../lib/secure';
+import { encrypt } from '../../lib/secure';
 
 export default (sequelize, DataTypes) => {
   const User = sequelize.define('User', {
@@ -28,15 +28,16 @@ export default (sequelize, DataTypes) => {
         len: [1, +Infinity],
       },
     },
-  }, {
-    classMethods: {
+  },
+  {
+    getterMethods: {
       fullName() {
         return `${this.firstName} ${this.lastName}`;
       },
-      // associate(/* models */) {
-      // associations can be defined here
-      // },
     },
+    // associate(/* models */) {
+    // associations can be defined here
   });
+
   return User;
 };
