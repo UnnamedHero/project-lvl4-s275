@@ -91,17 +91,17 @@ describe('Edit user', () => {
   });
 
   test('edit user while not signed in', async () => {
-    const res = await request.agent(server)
-      .get('/user');
-    expect(res).toHaveHTTPStatus(302);
+    const response = await request.agent(server)
+      .get('/users/currentUser');
+    expect(response).toHaveHTTPStatus(302);
   });
 
   test('hacker try to edit victim user', async () => {
-    const res = await signInUser(server, hackerUser, hackerUserPassword);
+    const response = await signInUser(server, hackerUser, hackerUserPassword);
     const victimUser = await getUserBy({ email: user.email });
     await request.agent(server)
       .patch(`/users/${victimUser.id}`)
-      .set('Cookie', getCookies(res))
+      .set('Cookie', getCookies(response))
       .send({
         form: {
           ...makeUser(),
@@ -112,12 +112,12 @@ describe('Edit user', () => {
   });
 
   test('edit self', async () => {
-    const res = await signInUser(server, user, userPassword);
+    const response = await signInUser(server, user, userPassword);
     const signedInUser = await getUserBy({ email: user.email });
     const newUserData = makeUser();
     await request.agent(server)
       .patch(`/users/${signedInUser.id}`)
-      .set('Cookie', getCookies(res))
+      .set('Cookie', getCookies(response))
       .send({
         form: {
           ...newUserData,
@@ -128,12 +128,12 @@ describe('Edit user', () => {
   });
 
   test('change password', async () => {
-    const res = await signInUser(server, user, userPassword);
+    const response = await signInUser(server, user, userPassword);
     const signedInUser = await getUserBy({ email: user.email });
     const newPassword = faker.internet.password();
     await request.agent(server)
       .patch(`/users/${signedInUser.id}/password`)
-      .set('Cookie', getCookies(res))
+      .set('Cookie', getCookies(response))
       .send({
         form: {
           password: userPassword,
@@ -142,18 +142,18 @@ describe('Edit user', () => {
         },
       });
 
-    const loginResWithOldPasssword = await signInUser(server, user, userPassword);
-    const resWithOldPassword = await request.agent(server)
-      .get('/user')
-      .set('Cookie', getCookies(loginResWithOldPasssword));
-    console.log(resWithOldPassword.status);
-    expect(resWithOldPassword).toHaveHTTPStatus(302);
+    const loginResponseWithOldPasssword = await signInUser(server, user, userPassword);
+    const responseWithOldPassword = await request.agent(server)
+      .get('/users/currentUser')
+      .set('Cookie', getCookies(loginResponseWithOldPasssword));
+    console.log(responseWithOldPassword.status);
+    expect(responseWithOldPassword).toHaveHTTPStatus(302);
 
-    const loginResWithNewPassword = await signInUser(server, user, newPassword);
-    const resWithNewPassword = await request.agent(server)
-      .get('/user')
-      .set('Cookie', getCookies(loginResWithNewPassword));
-    expect(resWithNewPassword).toHaveHTTPStatus(200);
+    const loginResponseWithNewPassword = await signInUser(server, user, newPassword);
+    const responseWithNewPassword = await request.agent(server)
+      .get('/users/CurrentUser')
+      .set('Cookie', getCookies(loginResponseWithNewPassword));
+    expect(responseWithNewPassword).toHaveHTTPStatus(200);
   });
 
   test('delete user', async () => {
@@ -161,14 +161,14 @@ describe('Edit user', () => {
     const usersListAtStart = await User.findAll();
     expect(usersListAtStart).toHaveLength(usersCount);
 
-    const guestResp = await request.agent(server)
+    const notSignedInResponse = await request.agent(server)
       .delete('/user');
-    expect(guestResp).toHaveHTTPStatus(302);
+    expect(notSignedInResponse).toHaveHTTPStatus(302);
 
-    const resHacker = await signInUser(server, hackerUser, hackerUserPassword);
+    const response = await signInUser(server, hackerUser, hackerUserPassword);
     await request.agent(server)
       .delete('/user')
-      .set('Cookie', getCookies(resHacker));
+      .set('Cookie', getCookies(response));
     const usersListAfterDeletion = await User.findAll();
     expect(usersListAfterDeletion).toHaveLength(usersCount - 1);
   });
