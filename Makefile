@@ -1,8 +1,12 @@
 console:
 		DEBUG="app:*" npm run gulp -- console
 
+
 init-db:
 	npm run sequelize -- db:migrate
+
+drop-db:
+	npm run sequelize -- db:drop
 
 lint:
 	npm run lint ./src
