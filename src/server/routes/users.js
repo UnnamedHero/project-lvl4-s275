@@ -18,7 +18,7 @@ export default (router, { logger }) => {
       const user = User.build();
       ctx.render('users/new', { f: buildFormObj(user) });
     })
-    .get('editCurrentUser', '/user', async (ctx) => {
+    .get('editCurrentUser', '/users/currentUser', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to edit your profile');
         ctx.redirect(router.url('root'));

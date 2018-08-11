@@ -92,7 +92,7 @@ describe('Edit user', () => {
 
   test('edit user while not signed in', async () => {
     const res = await request.agent(server)
-      .get('/user');
+      .get('/users/currentUser');
     expect(res).toHaveHTTPStatus(302);
   });
 
@@ -144,14 +144,14 @@ describe('Edit user', () => {
 
     const loginResWithOldPasssword = await signInUser(server, user, userPassword);
     const resWithOldPassword = await request.agent(server)
-      .get('/user')
+      .get('/users/currentUser')
       .set('Cookie', getCookies(loginResWithOldPasssword));
     console.log(resWithOldPassword.status);
     expect(resWithOldPassword).toHaveHTTPStatus(302);
 
     const loginResWithNewPassword = await signInUser(server, user, newPassword);
     const resWithNewPassword = await request.agent(server)
-      .get('/user')
+      .get('/users/CurrentUser')
       .set('Cookie', getCookies(loginResWithNewPassword));
     expect(resWithNewPassword).toHaveHTTPStatus(200);
   });
