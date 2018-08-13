@@ -10,24 +10,54 @@ const getUserBy = async params => User.findOne({
 
 export default (router, { logger }) => {
   router
-    .get('users', '/users', async (ctx) => {
-      const users = await User.findAll();
-      ctx.render('users', { users });
-    })
     .get('newUser', '/users/new', (ctx) => {
       const user = User.build();
       ctx.render('users/new', { f: buildFormObj(user) });
     })
-    .get('editCurrentUser', '/users/currentUser', async (ctx) => {
+    .post('registerUser', '/users', async (ctx) => {
+      const { form } = ctx.request.body;
+      const user = User.build(form);
+      try {
+        await user.save();
+        ctx.flash.set('User has been created');
+        ctx.redirect(router.url('root'));
+      } catch (e) {
+        ctx.render('users/new', { f: buildFormObj(user, e) });
+      }
+    })
+    .get('allUsers', '/users', async (ctx) => {
+      const users = await User.findAll();
+      ctx.render('users', { users });
+    })
+    .get('getCurrentUserProfile', '/users/profile', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to edit your profile');
         ctx.redirect(router.url('root'));
         return;
       }
       const user = await getUserBy({ id: ctx.session.userId });
-      ctx.render('users/edit', { f: buildFormObj(user), id: user.id });
+      ctx.render('users/edit', { f: buildFormObj(user) });
     })
-    .get('changeCurrentUserPassword', '/users/currentUser/password', async (ctx) => {
+    .patch('saveCurrentUserProfile', '/users/profile', async (ctx) => {
+      if (ctx.session.userId) {
+        const { userId } = ctx.session;
+        const { form: updatedUserData } = ctx.request.body;
+        const user = await getUserBy({ id: userId });
+        try {
+          await user.update({ ...updatedUserData });
+          logger(`userid ${userId} modified`);
+          ctx.flash.set('Your profile has been modified');
+          ctx.redirect(router.url('root'));
+        } catch (e) {
+          logger(`userid ${userId} NOT modified, ${e}`);
+          ctx.render('users/edit', { f: buildFormObj(user, e) });
+        }
+        return;
+      }
+      ctx.flash.set('You are not signed in');
+      ctx.redirect(router.url('root'));
+    })
+    .get('changeCurrentUserPassword', '/users/profile/password', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to change your password');
         ctx.redirect(router.url('root'));
@@ -40,64 +70,33 @@ export default (router, { logger }) => {
       };
       ctx.render('users/changePassword', { f: buildFormObj(passwordForm), id: ctx.session.userId });
     })
-    .post('users', '/users', async (ctx) => {
-      const { form } = ctx.request.body;
-      const user = User.build(form);
-      try {
-        await user.save();
-        ctx.flash.set('User has been created');
-        ctx.redirect(router.url('root'));
-      } catch (e) {
-        ctx.render('users/new', { f: buildFormObj(user, e) });
-      }
-    })
-    .patch('saveUserProfile', '/users/:id', async (ctx) => {
-      const { id } = ctx.params;
-      logger(`try to change userId ${id}, while logged id ${ctx.session.userId}`);
-      if (ctx.session.userId && String(ctx.session.userId) === id) {
-        const { form: updatedUserData } = ctx.request.body;
-        const user = await getUserBy({ id });
-        try {
-          await user.update({ ...updatedUserData });
-          logger(`userid ${id} modified`);
-          ctx.flash.set('User has been modified');
-          ctx.redirect(router.url('root'));
-        } catch (e) {
-          logger(`userid ${id} NOT modified, ${e}`);
-          ctx.render('users/edit', { f: buildFormObj(user, e), id: user.id });
-        }
-        return;
-      }
-      ctx.flash.set('You do not have permission to edit other users');
-      ctx.redirect(router.url('root'));
-    })
-    .patch('changeUserPassword', '/users/:id/password', async (ctx) => {
-      const { id } = ctx.params;
-      if (!(ctx.session.userId && String(ctx.session.userId) === id)) {
-        ctx.flash.set('You do not have permission to edit other users');
+    .patch('changeUserPassword', '/users/profile/password', async (ctx) => {
+      if (!ctx.session.userId) {
+        ctx.status = 403;
         ctx.redirect(router.url('root'));
         return;
       }
       const { form } = ctx.request.body;
-      const user = await getUserBy({ id });
+      const user = await getUserBy({ id: ctx.session.userId });
 
       if (form.newPassword !== form.confirmPassword) {
         ctx.flash.set('newPassword must match with confirmPassword');
-        ctx.render('users/changePassword', { f: buildFormObj(form), id });
+        logger('newPassword must match with confirmPassword');
+        ctx.render('users/changePassword', { f: buildFormObj(form) });
         return;
       }
       if (!(user && user.passwordDigest === encrypt(form.password))) {
+        logger(`Wrong password, ${user.id}, ${user.email}, ${form.password}`);
         ctx.flash.set('Wrong password');
-        ctx.render('users/changePassword', { f: buildFormObj(form), id });
+        ctx.render('users/changePassword', { f: buildFormObj(form) });
         return;
       }
-
       try {
         await user.update({ password: form.newPassword });
         ctx.flash.set('Password has been modified');
         ctx.redirect(router.url('root'));
       } catch (e) {
-        ctx.render('users/changePassword', { f: buildFormObj(form, e), id });
+        ctx.render('users/changePassword', { f: buildFormObj(form, e) });
       }
     })
     .delete('deleteCurrentUser', '/user', async (ctx) => {

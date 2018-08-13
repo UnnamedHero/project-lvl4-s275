@@ -14,13 +14,13 @@ html(lang="en")
         .collapse.navbar-collapse#navbarSupportedContent
           ul.navbar-nav.mr-auto
             li.nav-item.active
-              a.nav-link(href=urlFor('users')) Users
+              a.nav-link(href=urlFor('allUsers')) Users
           ul.navbar-nav
             if isSignedIn()
               li.nav-item.dropdown
                 a.nav-link.dropdown-toggle#profileDropdown(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Profile
                 .dropdown-menu.position-absolute(aria-labelledby='profileDropdown')
-                  a.dropdown-item(href=urlFor('editCurrentUser')) Edit profile
+                  a.dropdown-item(href=urlFor('getCurrentUserProfile')) Edit profile
                   a.dropdown-item(href=urlFor('changeCurrentUserPassword')) Change password
                   .dropdown-divider
                   a.dropdown-item(href=urlFor('deleteCurrentUser') data-method='delete' rel='nofollow') Delete profile
