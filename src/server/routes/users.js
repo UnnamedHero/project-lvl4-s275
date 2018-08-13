@@ -57,7 +57,7 @@ export default (router, { logger }) => {
       ctx.flash.set('You are not signed in');
       ctx.redirect(router.url('root'));
     })
-    .get('changeCurrentUserPassword', '/users/currentUser/password', async (ctx) => {
+    .get('changeCurrentUserPassword', '/users/profile/password', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to change your password');
         ctx.redirect(router.url('root'));
@@ -70,33 +70,33 @@ export default (router, { logger }) => {
       };
       ctx.render('users/changePassword', { f: buildFormObj(passwordForm), id: ctx.session.userId });
     })
-    .patch('changeUserPassword', '/users/:id/password', async (ctx) => {
-      const { id } = ctx.params;
-      if (!(ctx.session.userId && String(ctx.session.userId) === id)) {
-        ctx.flash.set('You do not have permission to edit other users');
+    .patch('changeUserPassword', '/users/profile/password', async (ctx) => {
+      if (!ctx.session.userId) {
+        ctx.status = 403;
         ctx.redirect(router.url('root'));
         return;
       }
       const { form } = ctx.request.body;
-      const user = await getUserBy({ id });
+      const user = await getUserBy({ id: ctx.session.userId });
 
       if (form.newPassword !== form.confirmPassword) {
         ctx.flash.set('newPassword must match with confirmPassword');
-        ctx.render('users/changePassword', { f: buildFormObj(form), id });
+        logger('newPassword must match with confirmPassword');
+        ctx.render('users/changePassword', { f: buildFormObj(form) });
         return;
       }
       if (!(user && user.passwordDigest === encrypt(form.password))) {
+        logger(`Wrong password, ${user.id}, ${user.email}, ${form.password}`);
         ctx.flash.set('Wrong password');
-        ctx.render('users/changePassword', { f: buildFormObj(form), id });
+        ctx.render('users/changePassword', { f: buildFormObj(form) });
         return;
       }
-
       try {
         await user.update({ password: form.newPassword });
         ctx.flash.set('Password has been modified');
         ctx.redirect(router.url('root'));
       } catch (e) {
-        ctx.render('users/changePassword', { f: buildFormObj(form, e), id });
+        ctx.render('users/changePassword', { f: buildFormObj(form, e) });
       }
     })
     .delete('deleteCurrentUser', '/user', async (ctx) => {

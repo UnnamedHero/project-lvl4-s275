@@ -114,10 +114,9 @@ describe('Edit user', () => {
 
   test('change password', async () => {
     const response = await signInUser(server, user, userPassword);
-    const signedInUser = await getUserBy({ email: user.email });
     const newPassword = faker.internet.password();
     await request.agent(server)
-      .patch(`/users/${signedInUser.id}/password`)
+      .patch('/users/profile/password')
       .set('Cookie', getCookies(response))
       .send({
         form: {
@@ -129,14 +128,13 @@ describe('Edit user', () => {
 
     const loginResponseWithOldPasssword = await signInUser(server, user, userPassword);
     const responseWithOldPassword = await request.agent(server)
-      .get('/users/currentUser')
+      .get('/users/profile')
       .set('Cookie', getCookies(loginResponseWithOldPasssword));
-    console.log(responseWithOldPassword.status);
     expect(responseWithOldPassword).toHaveHTTPStatus(302);
 
     const loginResponseWithNewPassword = await signInUser(server, user, newPassword);
     const responseWithNewPassword = await request.agent(server)
-      .get('/users/CurrentUser')
+      .get('/users/profile')
       .set('Cookie', getCookies(loginResponseWithNewPassword));
     expect(responseWithNewPassword).toHaveHTTPStatus(200);
   });
