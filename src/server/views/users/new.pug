@@ -2,8 +2,8 @@ extends /layouts/application.pug
 
 block content
   +formFor(f, { url: urlFor('registerUser'), method: 'post' })
-    +input(f, 'email')
+    +input(f, 'email', { required: true })
     +input(f, 'firstName')
     +input(f, 'lastName')
-    +input(f, 'password', { as: 'password' })
+    +input(f, 'password', { as: 'password', required: true })
     +button(f, 'Register')

@@ -2,7 +2,7 @@ extends /layouts/application.pug
 
 block content
   +formFor(f, { url: urlFor('saveCurrentUserProfile'), method: 'patch' })
-    +input(f, 'email')
+    +input(f, 'email', { required: true })
     +input(f, 'firstName')
     +input(f, 'lastName')
     +button(f, 'Save Profile')
