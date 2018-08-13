@@ -99,9 +99,16 @@ export default (router, { logger }) => {
         ctx.render('users/changePassword', { f: buildFormObj(form, e) });
       }
     })
-    .delete('deleteCurrentUser', '/user', async (ctx) => {
+    .get('deleteCurrentUserConfirmation', '/users/detete', async (ctx) => {
       if (!ctx.session.userId) {
         ctx.flash.set('You must sign in to delete your own profile');
+        ctx.redirect(router.url('root'));
+        return;
+      }
+      ctx.render('users/delete');
+    })
+    .delete('deleteCurrentUser', '/users', async (ctx) => {
+      if (!ctx.session.userId) {
         ctx.redirect(router.url('root'));
         return;
       }
