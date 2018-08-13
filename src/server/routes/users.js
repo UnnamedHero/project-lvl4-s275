@@ -10,13 +10,24 @@ const getUserBy = async params => User.findOne({
 
 export default (router, { logger }) => {
   router
-    .get('users', '/users', async (ctx) => {
-      const users = await User.findAll();
-      ctx.render('users', { users });
-    })
     .get('newUser', '/users/new', (ctx) => {
       const user = User.build();
       ctx.render('users/new', { f: buildFormObj(user) });
+    })
+    .post('users', '/users', async (ctx) => {
+      const { form } = ctx.request.body;
+      const user = User.build(form);
+      try {
+        await user.save();
+        ctx.flash.set('User has been created');
+        ctx.redirect(router.url('root'));
+      } catch (e) {
+        ctx.render('users/new', { f: buildFormObj(user, e) });
+      }
+    })
+    .get('allUsers', '/users/all', async (ctx) => {
+      const users = await User.findAll();
+      ctx.render('users', { users });
     })
     .get('editCurrentUser', '/users/currentUser', async (ctx) => {
       if (!ctx.session.userId) {
@@ -39,17 +50,6 @@ export default (router, { logger }) => {
         confirmPassword: '',
       };
       ctx.render('users/changePassword', { f: buildFormObj(passwordForm), id: ctx.session.userId });
-    })
-    .post('users', '/users', async (ctx) => {
-      const { form } = ctx.request.body;
-      const user = User.build(form);
-      try {
-        await user.save();
-        ctx.flash.set('User has been created');
-        ctx.redirect(router.url('root'));
-      } catch (e) {
-        ctx.render('users/new', { f: buildFormObj(user, e) });
-      }
     })
     .patch('saveUserProfile', '/users/:id', async (ctx) => {
       const { id } = ctx.params;
