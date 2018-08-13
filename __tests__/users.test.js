@@ -145,12 +145,12 @@ describe('Edit user', () => {
     expect(usersListAtStart).toHaveLength(usersCount);
 
     const notSignedInResponse = await request.agent(server)
-      .delete('/user');
+      .delete('/users');
     expect(notSignedInResponse).toHaveHTTPStatus(302);
 
     const response = await signInUser(server, hackerUser, hackerUserPassword);
     await request.agent(server)
-      .delete('/user')
+      .delete('/users')
       .set('Cookie', getCookies(response));
     const usersListAfterDeletion = await User.findAll();
     expect(usersListAfterDeletion).toHaveLength(usersCount - 1);
