@@ -14,7 +14,7 @@ export default (router, { logger }) => {
       const user = User.build();
       ctx.render('users/new', { f: buildFormObj(user) });
     })
-    .post('users', '/users', async (ctx) => {
+    .post('registerUser', '/users', async (ctx) => {
       const { form } = ctx.request.body;
       const user = User.build(form);
       try {
@@ -25,7 +25,7 @@ export default (router, { logger }) => {
         ctx.render('users/new', { f: buildFormObj(user, e) });
       }
     })
-    .get('allUsers', '/users/all', async (ctx) => {
+    .get('allUsers', '/users', async (ctx) => {
       const users = await User.findAll();
       ctx.render('users', { users });
     })
