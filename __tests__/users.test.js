@@ -13,7 +13,7 @@ const getCookies = res => res.headers['set-cookie'][0]
 const makeUser = (userParams = {}) => ({
   firstName: faker.name.firstName(),
   lastName: faker.name.lastName(),
-  email: faker.internet.email(),
+  email: faker.internet.exampleEmail(),
   ...userParams,
 });
 
