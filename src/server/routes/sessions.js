@@ -1,7 +1,7 @@
 import buildFormObj from '../../lib/formObjectBuilder';
 import { encrypt } from '../../lib/secure';
 import { User } from '../models'; //eslint-disable-line
-import { hasErrors, makeErrorsObj } from '../../lib/formErrorObjectBuilder';
+import { hasErrors, buildErrorsObj } from '../../lib/formErrorObjectBuilder';
 
 export default (router, { logger }) => {
   router
@@ -25,7 +25,7 @@ export default (router, { logger }) => {
         errors.password = 'Wrong password';
       }
       if (hasErrors(errors)) {
-        ctx.render('sessions/new', { f: buildFormObj({ email }, makeErrorsObj(errors)) });
+        ctx.render('sessions/new', { f: buildFormObj({ email }, buildErrorsObj(errors)) });
         return;
       }
 
