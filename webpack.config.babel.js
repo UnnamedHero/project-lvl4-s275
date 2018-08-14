@@ -6,10 +6,7 @@ const mode = process.env.NODE_ENV;
 
 export default {
   mode: mode === 'production' ? mode : 'development',
-  entry: {
-    vendor: ['jquery-ujs', 'bootstrap'],
-    app: ['./src/client/index.js'],
-  },
+  entry: ['jquery-ujs', './src/client/index.js'],
   output: {
     path: path.join(__dirname, 'public', 'assets'),
     publicPath: '/assets/',

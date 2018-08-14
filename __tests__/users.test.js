@@ -13,7 +13,7 @@ const getCookies = res => res.headers['set-cookie'][0]
 const makeUser = (userParams = {}) => ({
   firstName: faker.name.firstName(),
   lastName: faker.name.lastName(),
-  email: faker.internet.email(),
+  email: faker.internet.exampleEmail(),
   ...userParams,
 });
 
@@ -92,23 +92,8 @@ describe('Edit user', () => {
 
   test('edit user while not signed in', async () => {
     const response = await request.agent(server)
-      .get('/users/currentUser');
+      .get('/users/profile');
     expect(response).toHaveHTTPStatus(302);
-  });
-
-  test('hacker try to edit victim user', async () => {
-    const response = await signInUser(server, hackerUser, hackerUserPassword);
-    const victimUser = await getUserBy({ email: user.email });
-    await request.agent(server)
-      .patch(`/users/${victimUser.id}`)
-      .set('Cookie', getCookies(response))
-      .send({
-        form: {
-          ...makeUser(),
-        },
-      });
-    const expectedUser = await getUserBy({ id: victimUser.id });
-    expect(expectedUser).toEqual(victimUser);
   });
 
   test('edit self', async () => {
@@ -116,7 +101,7 @@ describe('Edit user', () => {
     const signedInUser = await getUserBy({ email: user.email });
     const newUserData = makeUser();
     await request.agent(server)
-      .patch(`/users/${signedInUser.id}`)
+      .patch('/users/profile')
       .set('Cookie', getCookies(response))
       .send({
         form: {
@@ -129,10 +114,9 @@ describe('Edit user', () => {
 
   test('change password', async () => {
     const response = await signInUser(server, user, userPassword);
-    const signedInUser = await getUserBy({ email: user.email });
     const newPassword = faker.internet.password();
     await request.agent(server)
-      .patch(`/users/${signedInUser.id}/password`)
+      .patch('/users/profile/password')
       .set('Cookie', getCookies(response))
       .send({
         form: {
@@ -142,16 +126,14 @@ describe('Edit user', () => {
         },
       });
 
-    const loginResponseWithOldPasssword = await signInUser(server, user, userPassword);
+    await signInUser(server, user, userPassword);
     const responseWithOldPassword = await request.agent(server)
-      .get('/users/currentUser')
-      .set('Cookie', getCookies(loginResponseWithOldPasssword));
-    console.log(responseWithOldPassword.status);
+      .get('/users/profile');
     expect(responseWithOldPassword).toHaveHTTPStatus(302);
 
     const loginResponseWithNewPassword = await signInUser(server, user, newPassword);
     const responseWithNewPassword = await request.agent(server)
-      .get('/users/CurrentUser')
+      .get('/users/profile')
       .set('Cookie', getCookies(loginResponseWithNewPassword));
     expect(responseWithNewPassword).toHaveHTTPStatus(200);
   });
@@ -162,12 +144,12 @@ describe('Edit user', () => {
     expect(usersListAtStart).toHaveLength(usersCount);
 
     const notSignedInResponse = await request.agent(server)
-      .delete('/user');
+      .delete('/users');
     expect(notSignedInResponse).toHaveHTTPStatus(302);
 
     const response = await signInUser(server, hackerUser, hackerUserPassword);
     await request.agent(server)
-      .delete('/user')
+      .delete('/users')
       .set('Cookie', getCookies(response));
     const usersListAfterDeletion = await User.findAll();
     expect(usersListAfterDeletion).toHaveLength(usersCount - 1);
