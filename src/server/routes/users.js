@@ -1,6 +1,7 @@
 import buildFormObj from '../../lib/formObjectBuilder';
 import { User } from '../models'; //eslint-disable-line 
 import { encrypt } from '../../lib/secure';
+import { hasErrors, buildErrorsObj } from '../../lib/formErrorObjectBuilder';
 
 const getUserBy = async params => User.findOne({
   where: {
@@ -79,18 +80,20 @@ export default (router, { logger }) => {
       const { form } = ctx.request.body;
       const user = await getUserBy({ id: ctx.session.userId });
 
+      const errors = { };
       if (form.newPassword !== form.confirmPassword) {
-        ctx.flash.set('newPassword must match with confirmPassword');
+        errors.confirmPassword = 'newPassword must match with confirmPassword';
         logger('newPassword must match with confirmPassword');
-        ctx.render('users/changePassword', { f: buildFormObj(form) });
-        return;
       }
       if (!(user && user.passwordDigest === encrypt(form.password))) {
-        logger(`Wrong password, ${user.id}, ${user.email}, ${form.password}`);
-        ctx.flash.set('Wrong password');
-        ctx.render('users/changePassword', { f: buildFormObj(form) });
+        logger(`Wrong password, ${user.id}, ${user.email}`);
+        errors.password = 'Wrong password';
+      }
+      if (hasErrors(errors)) {
+        ctx.render('users/changePassword', { f: buildFormObj(form, buildErrorsObj(errors)) });
         return;
       }
+
       try {
         await user.update({ password: form.newPassword });
         ctx.flash.set('Password has been modified');
@@ -118,13 +121,13 @@ export default (router, { logger }) => {
           await user.destroy();
         } catch (e) {
           ctx.flash.set('Something going wrong while deleting user');
-          ctx.session = {};
+          ctx.session.userId = undefined;
           ctx.redirect(router.url('root'));
           return;
         }
       }
       ctx.flash.set('Profile deleted. Good buy.');
-      ctx.session = {};
+      ctx.session.userId = undefined;
       ctx.redirect(router.url('root'));
     });
 };

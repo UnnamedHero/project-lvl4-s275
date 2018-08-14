@@ -126,10 +126,9 @@ describe('Edit user', () => {
         },
       });
 
-    const loginResponseWithOldPasssword = await signInUser(server, user, userPassword);
+    await signInUser(server, user, userPassword);
     const responseWithOldPassword = await request.agent(server)
-      .get('/users/profile')
-      .set('Cookie', getCookies(loginResponseWithOldPasssword));
+      .get('/users/profile');
     expect(responseWithOldPassword).toHaveHTTPStatus(302);
 
     const loginResponseWithNewPassword = await signInUser(server, user, newPassword);
