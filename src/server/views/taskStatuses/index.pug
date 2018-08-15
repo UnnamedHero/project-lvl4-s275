@@ -1,0 +1,18 @@
+extends /layouts/taskStatuses.pug
+
+block taskStatus
+  h4 Available statuses
+    a.btn.btn-primary.btn-sm(href='/taskStatuses/new' role='button') [+]
+
+  table.table.table-bordered.table-striped
+    thead
+      tr
+        th Name
+        th actions
+    tbody
+      each taskStatus in allTaskStatuses
+        tr
+          td= taskStatus.name
+          td 
+            p [edit]
+            a.btn.btn-danger(href=urlFor('deleteTaskStatus', { id: taskStatus.id }) data-method='delete' rel='nofollow' role='button' ) Delete profile
