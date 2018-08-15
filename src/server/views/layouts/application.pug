@@ -18,6 +18,10 @@ html(lang="en")
           ul.navbar-nav
             if isSignedIn()
               li.nav-item.dropdown
+                a.nav-link.dropdown-toggle#adminDropdown(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Settings
+                .dropdown-menu.position-absolute(aria-labelledby='adminDropdown')
+                  a.dropdown-item(href=urlFor('getTaskStatuses')) Task Statuses
+              li.nav-item.dropdown
                 a.nav-link.dropdown-toggle#profileDropdown(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Profile
                 .dropdown-menu.position-absolute(aria-labelledby='profileDropdown')
                   a.dropdown-item(href=urlFor('getCurrentUserProfile')) Edit profile
