@@ -5,6 +5,9 @@ console:
 init-db:
 	npm run sequelize -- db:migrate
 
+populate-db:
+	npm run sequelize -- db:seed:all
+
 drop-db:
 	npm run sequelize -- db:drop
 
