@@ -3,6 +3,7 @@ export default (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       unique: true,
+      allowNull: false,
     },
   });
   // TaskStatus.associate = function(models) {
