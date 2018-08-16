@@ -1,0 +1,7 @@
+extends /layouts/taskStatuses.pug
+
+block taskStatus
+  h4 Edit task status
+  +formFor(f, { url: urlFor('editTaskStatus', { id }), method: 'patch' })
+    +input(f, 'name', { required: true })
+    +button(f, 'Save')
