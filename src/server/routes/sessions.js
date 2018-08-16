@@ -26,6 +26,7 @@ export default (router, { logger }) => {
       }
       if (hasErrors(errors)) {
         ctx.render('sessions/new', { f: buildFormObj({ email }, buildErrorsObj(errors)) });
+        logger(`SignIn errors: ${JSON.stringify(errors)}`);
         return;
       }
 
