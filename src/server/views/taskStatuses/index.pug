@@ -14,5 +14,5 @@ block taskStatus
         tr
           td= taskStatus.name
           td 
-            p [edit]
-            a.btn.btn-danger(href=urlFor('deleteTaskStatus', { id: taskStatus.id }) data-method='delete' rel='nofollow' role='button' ) Delete profile
+            a.btn.btn-secindary(href=urlFor('editTaskStatus', { id: taskStatus.id }) role='button' ) Edit
+            a.btn.btn-danger(href=urlFor('deleteTaskStatus', { id: taskStatus.id }) data-method='delete' rel='nofollow' role='button' ) Delete
