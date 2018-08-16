@@ -4,41 +4,15 @@ import matchers from 'jest-supertest-matchers';
 
 import app from '../src/server';
 import { User, sequelize } from '../src/server/models'; //eslint-disable-line
-
-const getCookies = res => res.headers['set-cookie'][0]
-  .split(',')
-  .map(item => item.split(';')[0])
-  .join(';');
+import {
+  signUpUser, signInUser, getUserBy, getCookies,
+} from './helpers';
 
 const makeUser = (userParams = {}) => ({
   firstName: faker.name.firstName(),
   lastName: faker.name.lastName(),
   email: faker.internet.exampleEmail(),
   ...userParams,
-});
-
-const signUpUser = async (server, user, password) => request.agent(server)
-  .post('/users')
-  .send({
-    form: {
-      ...user,
-      password,
-    },
-  });
-
-const signInUser = async (server, user, password) => request.agent(server)
-  .post('/session')
-  .send({
-    form: {
-      email: user.email,
-      password,
-    },
-  });
-
-const getUserBy = async params => User.findOne({
-  where: {
-    ...params,
-  },
 });
 
 beforeAll(async () => {
