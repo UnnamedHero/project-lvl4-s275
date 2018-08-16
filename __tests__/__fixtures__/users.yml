@@ -1,0 +1,25 @@
+fixtures:
+  - model: User
+    data:
+      id: 1
+      email: john.snow@wall.westeross
+      firstName: John
+      lastName: Snow
+      password: js
+  - model: User
+    data:
+      id: 2
+      email: valarmorghullis@winterfell.westeross
+      firstName: Aria
+      lastName: Stark
+      password: as
+  - model: User
+    data:
+      id: 3
+      email: Olga86@dom2.ru
+      firstName: Olga
+      lastName: Buzova
+      password: jkhlkH(y)_!*@#0--08iohopihdweljh!
+
+
+  
