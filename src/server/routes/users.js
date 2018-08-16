@@ -126,8 +126,7 @@ export default (router, { logger }) => {
           return;
         }
       }
-      ctx.flash.set('Profile deleted. Good buy.');
-      ctx.session.userId = undefined;
+      ctx.session = {};
       ctx.redirect(router.url('root'));
     });
 };
