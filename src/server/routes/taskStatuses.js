@@ -2,6 +2,8 @@ import buildFormObj from '../../lib/formObjectBuilder';
 import { ensureLoggedIn } from '../../lib/middlewares';
 import { TaskStatus } from '../models'; //eslint-disable-line
 
+const getTaskStatusById = async id => TaskStatus.findOne({ where: { id } });
+
 export default (router, { logger }) => {
   router
     .get('getTaskStatuses', '/taskStatuses', ensureLoggedIn, async (ctx) => {
@@ -23,6 +25,23 @@ export default (router, { logger }) => {
         ctx.render('taskStatuses/new', { f: buildFormObj(taskStatus, e) });
       }
     })
+    .get('getTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
+      const { id } = ctx.params;
+      const taskStatus = await getTaskStatusById(id);
+      ctx.render('taskStatuses/edit', { f: buildFormObj(taskStatus), id });
+    })
+    .patch('editTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
+      const { id } = ctx.params;
+      const { form } = ctx.request.body;
+      const taskStatus = await getTaskStatusById(id);
+      try {
+        await taskStatus.update(form);
+        ctx.flash.set('Task status updated');
+      } catch (e) {
+        ctx.flash.set(`Task ${taskStatus.name} NOT updated`);
+      }
+      ctx.redirect(router.url('getTaskStatuses'));
+    })
     .delete('deleteTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
       const totalTaskStatuses = await TaskStatus.count({ where: {} });
       if (totalTaskStatuses <= 1) {
@@ -33,9 +52,7 @@ export default (router, { logger }) => {
 
       const { id } = ctx.params;
 
-      const taskStatus = await TaskStatus.findOne({
-        where: { id },
-      });
+      const taskStatus = await getTaskStatusById(id);
       logger(`${id}: ${taskStatus}`);
       try {
         await taskStatus.destroy();
