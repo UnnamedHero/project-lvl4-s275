@@ -20,8 +20,10 @@ export default (router, { logger }) => {
       try {
         await taskStatus.save();
         ctx.flash.set('Task status added!');
+        logger(`task status ${taskStatus.name} added`);
         ctx.redirect(router.url('getTaskStatuses'));
       } catch (e) {
+        logger(`task status ${taskStatus.name} not added`);
         ctx.render('taskStatuses/new', { f: buildFormObj(taskStatus, e) });
       }
     })
@@ -34,6 +36,7 @@ export default (router, { logger }) => {
       const { id } = ctx.params;
       const { form } = ctx.request.body;
       const taskStatus = await getTaskStatusById(id);
+      logger(`going to change status ${id}: ${taskStatus.name} to ${form.name}`);
       try {
         await taskStatus.update(form);
         ctx.flash.set('Task status updated');
@@ -51,14 +54,14 @@ export default (router, { logger }) => {
       }
 
       const { id } = ctx.params;
-
       const taskStatus = await getTaskStatusById(id);
-      logger(`${id}: ${taskStatus}`);
       try {
         await taskStatus.destroy();
         ctx.flash.set(`Task status ${taskStatus.name} deleted`);
+        logger(`Task status deleted ${id}: ${taskStatus.name}`);
       } catch (e) {
         ctx.flash.set(`Task status ${taskStatus.name} NOT deleted!!!`);
+        logger(`Task status NOT deleted ${id}: ${taskStatus.name}`);
       }
       ctx.redirect(router.url('getTaskStatuses'));
     });
