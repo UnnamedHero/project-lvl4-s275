@@ -12,7 +12,7 @@ drop-db:
 	npm run sequelize -- db:drop
 
 lint:
-	npm run lint ./src
+	npm run lint .
 
 publish:
 	git push heroku master
