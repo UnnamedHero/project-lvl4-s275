@@ -1,7 +1,8 @@
 extends /layouts/tasks.pug
+
 include /mixins/modalDeleteConfirm.pug
 
-block content
+block tasks
   a.btn
   table.table.table-bordered.table-striped
     tbody
@@ -13,8 +14,7 @@ block content
         td= task.desription
       tr
         th.w-25(scope='row') Created by
-        td
-          +nameOrEmail(task.creator)
+        td= nameOrEmail(task.creator)
       tr
         th.w-25(scope='row') Created at
         td= task.createdAt
@@ -26,8 +26,7 @@ block content
         td= task.taskStatus.name
       tr
         th.w-25(scope='row') Assigned to
-        td
-          +nameOrEmail(task.assignedTo)
+        td= nameOrEmail(task.assignedTo)
       tr
         th.w-25(scope='row') Tags
         td
