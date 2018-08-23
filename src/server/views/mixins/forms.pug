@@ -26,7 +26,6 @@ mixin select(f, property, options = { items: [], required: false })
         +selectOption(item)
 
 mixin selectOption(item)
-  - console.log(`${item.name}: ${item.selected}`)
   if item.selected
     option(value= `${item.id}` selected)= item.name
   else 
@@ -35,9 +34,3 @@ mixin selectOption(item)
 mixin button(f, value = 'Save', type = 'submit')
   .form-group
     input(class='btn btn-primary' type=`${type}` value=`${value}`)
-//- TODO: move to a separate mixin file
-mixin nameOrEmail(user)
-  if (user)
-    = `${user.name ? user.name : user.email}`
-  else
-    = 'Nobody'
