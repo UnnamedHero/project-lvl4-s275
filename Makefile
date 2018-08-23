@@ -1,7 +1,6 @@
 console:
 		DEBUG="app:*" npm run gulp -- console
 
-
 init-db:
 	npm run sequelize -- db:migrate
 
@@ -22,6 +21,11 @@ test:
 
 watch:
 	DEBUG="app" NODE_ENV=test npm test -- --watch
+
+remove-db:
+	rm -rf ./db.development.sqlite
+
+reinit-dev: remove-db init-db populate-db
 
 start:
 	npm run webpack -- -p --env development
