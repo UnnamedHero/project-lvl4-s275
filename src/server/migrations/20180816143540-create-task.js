@@ -9,19 +9,11 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       name: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       description: {
         type: Sequelize.TEXT
-      },
-      status: {
-        type: Sequelize.INTEGER
-      },
-      creator: {
-        type: Sequelize.INTEGER
-      },
-      assignedTo: {
-        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
