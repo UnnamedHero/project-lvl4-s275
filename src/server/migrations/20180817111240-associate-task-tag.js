@@ -4,7 +4,13 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable(
       'TaskTags', 
-      { 
+      {
+        id: {
+          allowNull: false,
+          autoIncrement: true,
+          primaryKey: true,
+          type: Sequelize.INTEGER
+        },        
         createdAt: {
           allowNull: false,
           type: Sequelize.DATE
@@ -15,11 +21,11 @@ module.exports = {
         },
         taskId: {
           type: Sequelize.INTEGER,
-          primaryKey: true,
+          allowNull: false,
         },
         tagId: {
           type: Sequelize.INTEGER,
-          primaryKey: true,
+          allowNull: false,
         },
       });
   },
