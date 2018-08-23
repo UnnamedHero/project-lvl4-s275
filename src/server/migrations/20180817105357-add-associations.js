@@ -8,7 +8,7 @@ module.exports = {
       {
         type: Sequelize.INTEGER,
         references: {
-          model: 'User',
+          model: 'Users',
           key: 'id',
         },
         onUpdate: 'CASCADE',
@@ -18,11 +18,26 @@ module.exports = {
     .then(() => {
       return queryInterface.addColumn(
         'Tasks',
-        'statusId',
+        'assignedToId',
         {
           type: Sequelize.INTEGER,
           references: {
-            model: 'TaskStatus',
+            model: 'Users',
+            key: 'id',
+          },
+          onUpdate: 'CASCADE',
+          onDelete: 'SET NULL',
+        },
+      )        
+    })
+    .then(() => {
+      return queryInterface.addColumn(
+        'Tasks',
+        'taskStatusId',
+        {
+          type: Sequelize.INTEGER,
+          references: {
+            model: 'TaskStatuses',
             key: 'id',
           },
           onUpdate: 'CASCADE',
