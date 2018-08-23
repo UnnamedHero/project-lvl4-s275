@@ -2,18 +2,21 @@ import buildFormObj from '../../lib/formObjectBuilder';
 import { ensureLoggedIn } from '../../lib/middlewares';
 import { Task, User, TaskStatus, Tag } from '../models'; //eslint-disable-line
 import { hasErrors, buildErrorsObj } from '../../lib/formErrorObjectBuilder';
+import nameOrEmail from '../../lib/nameOrEmail';
 import getTags from '../../lib/models/tags';
 
 const makeAssignedToList = async (selectedId = 'nobody') => {
   const users = await User.findAll();
-  const usersData = users.map((user) => {
-    const { email, id, fullName } = user;
-    const name = fullName && fullName.trim().length > 0 ? fullName : email;
-    const selected = selectedId === id;
+  const usersWithSelecled = users.map((user) => {
+    const { id } = user;
+    const name = nameOrEmail(user);
+    const selected = selectedId === user.id;
     return ({ id, name, selected });
   });
-  const nobody = { id: 'nobody', name: 'Nobody', selected: selectedId === 'nobody' };
-  return [nobody, ...usersData];
+  const nobody = {
+    id: 'nobody', name: 'Nobody', selected: selectedId === 'nobody',
+  };
+  return [nobody, ...usersWithSelecled];
 };
 
 const makeTaskStatusesList = async (selectedId) => {
