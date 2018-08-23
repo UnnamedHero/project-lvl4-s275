@@ -6,8 +6,5 @@ export default (sequelize, DataTypes) => {
       allowNull: false,
     },
   });
-  // TaskStatus.associate = function(models) {
-    // associations can be defined here
-  // };
   return TaskStatus;
 };
