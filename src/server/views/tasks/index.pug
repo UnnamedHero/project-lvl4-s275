@@ -1,0 +1,21 @@
+extends /layouts/tasks.pug
+
+block content
+  table.table.table-bordered.table-striped
+    thead
+      tr
+        th id
+        th Name
+        th Description
+        th Status
+        th Assigned to
+    tbody
+      each task in tasks
+        tr
+          td
+            a(href= urlFor('showTask', { id: task.id }))= `#${task.id}`
+          td= task.name
+          td= task.description
+          td= task.taskStatus.name
+          //- TODO: use mixin
+          td= `${task.assignedTo ? task.assignedTo.email : 'Nobody'}`
