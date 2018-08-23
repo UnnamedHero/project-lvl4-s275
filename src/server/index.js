@@ -38,7 +38,7 @@ export default () => {
       }
     });
   }
-  // TODO: fix flash
+
   app.use(flash());
   app.use(async (ctx, next) => {
     ctx.state = {
