@@ -2,10 +2,10 @@ extends /layouts/tasks.pug
 
 block tasks
   h4 Add new tasks
-  +formFor(f, { url: urlFor('addTasks'), method: 'post' })
+  +formFor(f, { url: urlFor('publishTask'), method: 'post' })
     +input(f, 'name', { required: true })
     +input(f, 'description')
-    +select(f, 'status', { required: true, items: taskStatuses })
-    +input(f, 'assignedTo')
+    +select(f, 'taskStatus', { required: true, items: taskStatuses })
+    +select(f, 'assignedTo', { items: assignedTo })
     +input(f, 'tags', { required: true })
     +button(f, 'Add')
