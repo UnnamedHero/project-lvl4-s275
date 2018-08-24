@@ -1,0 +1,12 @@
+extends /layouts/tasks.pug
+
+block tasks
+  h4 Edit tasks
+  +formFor(f, { url: urlFor('saveEditedTask', { id }), method: 'patch' })
+    +input(f, 'name', { required: true })
+    +input(f, 'description')
+    +select(f, 'taskStatusId', { required: true, items: taskStatuses })
+    +select(f, 'assignedToId', { items: assignedTo })
+    +input(f, 'tags', { required: true })
+    +button(f, 'Save')
+  
