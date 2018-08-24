@@ -1,0 +1,40 @@
+extends /layouts/tasks.pug
+
+include /mixins/modalDeleteConfirm.pug
+
+block tasks
+  a.btn
+  table.table.table-bordered.table-striped
+    tbody
+      tr
+        th.w-25(scope='row') Name
+        td= task.name
+      tr
+        th.w-25(scope='row') Description
+        td= task.desription
+      tr
+        th.w-25(scope='row') Created by
+        td= nameOrEmail(task.creator)
+      tr
+        th.w-25(scope='row') Created at
+        td= task.createdAt
+      tr
+        th.w-25(scope='row') Last modified at
+        td= task.updatedAt
+      tr
+        th.w-25(scope='row') Status
+        td= task.taskStatus.name
+      tr
+        th.w-25(scope='row') Assigned to
+        td= nameOrEmail(task.assignedTo)
+      tr
+        th.w-25(scope='row') Tags
+        td= task.tags
+
+  - const modalId = `taskId${task.id}`
+  a.btn.btn-sm(href=urlFor('editTask', { id: task.id }) role='button') Edit
+  +modalButton(modalId)
+
+  +modalWindow(modalId, urlFor('deleteTask', { id: task.id }), `task id#${task.id}`)
+
+

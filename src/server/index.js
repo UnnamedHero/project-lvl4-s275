@@ -16,6 +16,7 @@ import _ from 'lodash';
 
 import container from './container';
 import addRoutes from './routes';
+import nameOrEmail from '../lib/nameOrEmail';
 // import webpackConfig from '../../webpack.config.babel';
 
 const isDevEnv = process.env.NODE_ENV === 'development';
@@ -37,7 +38,7 @@ export default () => {
       }
     });
   }
-  // TODO: fix flash
+
   app.use(flash());
   app.use(async (ctx, next) => {
     ctx.state = {
@@ -81,7 +82,7 @@ export default () => {
     locals: [],
     basedir: path.join(__dirname, './views'),
     helperPath: [
-      { _ },
+      { _, nameOrEmail },
       { urlFor: (...args) => router.url(...args) },
     ],
   });
