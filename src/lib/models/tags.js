@@ -20,8 +20,10 @@ const getOrCreateTags = async (tagNames) => {
   return tags;
 };
 
-export default async (stringOfTags) => {
+export const getTags = async (stringOfTags) => {
   const tagNames = getTagsFromString(stringOfTags);
   const tags = await getOrCreateTags(tagNames);
   return tags;
 };
+
+export const makeTags = tags => tags.map(tag => tag.name).join(' ');
