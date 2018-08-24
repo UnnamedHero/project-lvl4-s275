@@ -6,5 +6,8 @@ export default (sequelize, DataTypes) => {
       allowNull: false,
     },
   });
+  TaskStatus.assosiate = (models) => {
+    TaskStatus.hasMany(models.Task, { foreignKey: 'taskStatusId' });
+  };
   return TaskStatus;
 };
