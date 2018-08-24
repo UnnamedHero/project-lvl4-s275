@@ -1,5 +1,5 @@
 - const getInputName = (f, property) => `${f.name}[${property}]`
-
+//- TODO: add proper input label naming
 mixin formFor(f, options = {})
   - const url = _.get(options, 'url');
   - const method = _.get(options, 'method', 'get').toLowerCase();
