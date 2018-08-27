@@ -3,9 +3,9 @@ import faker from 'faker';
 import matchers from 'jest-supertest-matchers';
 
 import app from '../src/server';
-import { User, sequelize } from '../src/server/models'; //eslint-disable-line
+import models, { User, sequelize } from '../src/server/models'; //eslint-disable-line
 import {
-  signUpUser, signInUser, getUserBy, getCookies,
+  signUpUser, signInUser, getUserBy, getCookies, getAuthCookies,
 } from './helpers';
 
 const makeUser = (userParams = {}) => ({
@@ -71,13 +71,13 @@ describe('Edit user', () => {
   });
 
   test('edit self', async () => {
-    const response = await signInUser(server, user, userPassword);
+    const authCookies = await getAuthCookies(server, user, userPassword);
     const signedInUser = await getUserBy({ email: user.email });
     const newUserData = makeUser();
-    // TODO: merge sign in and getCookies
+
     await request.agent(server)
       .patch('/users/profile')
-      .set('Cookie', getCookies(response))
+      .set('Cookie', authCookies)
       .send({
         form: {
           ...newUserData,
@@ -88,11 +88,11 @@ describe('Edit user', () => {
   });
 
   test('change password', async () => {
-    const response = await signInUser(server, user, userPassword);
+    const authCookies = await getAuthCookies(server, user, userPassword);
     const newPassword = faker.internet.password();
     await request.agent(server)
       .patch('/users/profile/password')
-      .set('Cookie', getCookies(response))
+      .set('Cookie', authCookies)
       .send({
         form: {
           password: userPassword,
@@ -122,10 +122,10 @@ describe('Edit user', () => {
       .delete('/users');
     expect(notSignedInResponse).toHaveHTTPStatus(302);
 
-    const response = await signInUser(server, hackerUser, hackerUserPassword);
+    const authCookies = await getAuthCookies(server, hackerUser, hackerUserPassword);
     await request.agent(server)
       .delete('/users')
-      .set('Cookie', getCookies(response));
+      .set('Cookie', authCookies);
     const usersListAfterDeletion = await User.findAll();
     expect(usersListAfterDeletion).toHaveLength(usersCount - 1);
   });
