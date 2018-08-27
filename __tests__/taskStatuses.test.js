@@ -1,50 +1,39 @@
 import request from 'supertest';
 import faker from 'faker';
 import matchers from 'jest-supertest-matchers';
-import sequelizeFixtures from 'sequelize-fixtures';
-import path from 'path';
 
 import app from '../src/server';
 import { User, TaskStatus, sequelize } from '../src/server/models'; //eslint-disable-line
-import { signInUser, getCookies } from './helpers';
-
-const fixturesPath = path.join(__dirname, '__fixtures__');
-const pathToFixture = name => path.join(fixturesPath, name);
-
-const loadUserFixtures = async () => sequelizeFixtures.loadFile(pathToFixture('users.yml'), { User });
-
+import { getAuthCookies, loadFixtures } from './helpers';
 
 const makeTaskStatus = () => ({ name: faker.lorem.word() });
 
-const postTaskStatus = async (server, authResponse, taskStatus) => request.agent(server)
+const postTaskStatus = async (server, authCookies, taskStatus) => request.agent(server)
   .post('/taskStatuses')
-  .set('Cookie', getCookies(authResponse))
+  .set('Cookie', authCookies)
   .send({ form: { ...taskStatus } });
 
 beforeAll(async () => {
   jasmine.addMatchers(matchers);
   await User.sync({ force: true });
   await TaskStatus.sync({ force: true });
-  await loadUserFixtures();
+  await loadFixtures(['users.yml']);
 });
 
 describe('task statuses CRUD', () => {
   let server;
-  let authResponse;
+  let authCookies;
   const status = makeTaskStatus();
 
   beforeEach(async () => {
     server = app().listen();
-    authResponse = await signInUser(server, { email: 'john.snow@wall.westeross' }, 'js');
+    authCookies = await getAuthCookies(server, { email: 'john.snow@wall.westeross' }, 'js');
   });
 
   test('create/read', async () => {
-    console.log(status);
-    await postTaskStatus(server, authResponse, status);
-
-
+    await postTaskStatus(server, authCookies, status);
     const anotherStatus = makeTaskStatus();
-    await postTaskStatus(server, authResponse, anotherStatus);
+    await postTaskStatus(server, authCookies, anotherStatus);
 
     const taskStatuses = await TaskStatus.findAll();
     expect(taskStatuses).toHaveLength(2);
@@ -56,8 +45,9 @@ describe('task statuses CRUD', () => {
     await TaskStatus.findOne({ where: { id } });
     await request.agent(server)
       .patch(`/taskStatuses/${id}`)
-      .set('Cookie', getCookies(authResponse))
+      .set('Cookie', authCookies)
       .send({ form: { ...updatedStatusName } });
+
     const updatedStatus = await TaskStatus.findOne({ where: { id } });
     expect(updatedStatus).toMatchObject(updatedStatusName);
   });
@@ -66,7 +56,7 @@ describe('task statuses CRUD', () => {
     const id = 1;
     await request.agent(server)
       .delete(`/taskStatuses/${id}`)
-      .set('Cookie', getCookies(authResponse));
+      .set('Cookie', authCookies);
     const taskStatuses = await TaskStatus.findAll();
     expect(taskStatuses).toHaveLength(1);
   });
