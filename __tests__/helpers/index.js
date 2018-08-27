@@ -4,7 +4,7 @@ import sequelizeFixtures from 'sequelize-fixtures';
 
 import models from '../../src/server/models'; //eslint-disable-line
 
-export const getCookies = res => res.headers['set-cookie'][0]
+const getCookies = res => res.headers['set-cookie'][0]
   .split(',')
   .map(item => item.split(';')[0])
   .join(';');
@@ -18,7 +18,7 @@ export const signUpUser = async (server, user, password) => request.agent(server
     },
   });
 
-export const signInUser = async (server, user, password) => request.agent(server)
+const signInUser = async (server, user, password) => request.agent(server)
   .post('/session')
   .send({
     form: {
