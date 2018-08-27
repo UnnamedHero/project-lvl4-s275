@@ -1,0 +1,18 @@
+fixtures:
+  - model: Tag
+    data:
+      id: 1
+      name: Tag1
+  - model: Tag
+    data:
+      id: 2
+      name: Tag2
+  - model: Tag
+    data:
+      id: 3
+      name: Tag3
+  - model: Tag
+    data:
+      id: 4
+      name: Tag4
+  
