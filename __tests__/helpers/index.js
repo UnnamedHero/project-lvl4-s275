@@ -1,5 +1,8 @@
 import request from 'supertest';
-import { User } from '../../src/server/models'; //eslint-disable-line
+import path from 'path';
+import sequelizeFixtures from 'sequelize-fixtures';
+
+import models from '../../src/server/models'; //eslint-disable-line
 
 export const getCookies = res => res.headers['set-cookie'][0]
   .split(',')
@@ -24,8 +27,23 @@ export const signInUser = async (server, user, password) => request.agent(server
     },
   });
 
-export const getUserBy = async params => User.findOne({
+export const getUserBy = async params => models.User.findOne({
   where: {
     ...params,
   },
 });
+
+export const getAuthCookies = async (server, user, password) => {
+  const response = await signInUser(server, user, password);
+  return getCookies(response);
+};
+
+const fixturesPath = path.join(__dirname, '..', '__fixtures__');
+const pathToFixture = name => path.join(fixturesPath, name);
+
+export const loadFixtures = async (fileNames) => {
+  const paths = fileNames.map(fileName => pathToFixture(fileName));
+  await sequelizeFixtures.loadFiles(paths, models);
+};
+
+export const getTagsFromTask = task => task.Tags.map(tag => tag.name).join(' ');

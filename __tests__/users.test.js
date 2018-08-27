@@ -74,6 +74,7 @@ describe('Edit user', () => {
     const response = await signInUser(server, user, userPassword);
     const signedInUser = await getUserBy({ email: user.email });
     const newUserData = makeUser();
+    // TODO: merge sign in and getCookies
     await request.agent(server)
       .patch('/users/profile')
       .set('Cookie', getCookies(response))

@@ -119,14 +119,13 @@ export default (router, { logger }) => {
         ctx.flash.set(`Task #${id} not found`);
         ctx.redirect(router.url('getTasks'));
       }
-      logger(JSON.stringify(task));
       try {
         const { assignedToId } = form;
         const goodForm = {
           ...form,
           assignedToId: assignedToId === 'nobody' ? null : assignedToId,
         };
-        logger(goodForm);
+        logger(`new task data: ${goodForm}`);
         await task.update(goodForm);
         const tags = await getTags(form.tags);
         logger('updating tags');
