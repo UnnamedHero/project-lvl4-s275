@@ -12,7 +12,7 @@ const makeTask = (assignedToId = null) => ({
   name: faker.lorem.word(),
   description: faker.lorem.words(),
   assignedToId,
-  taskStatusId: faker.random.number({ max: 4 }),
+  taskStatusId: faker.random.number({ min: 1, max: 4 }),
 });
 
 const makeTags = () => uniq(faker.lorem.words(5).split(' ')).join(' ');
