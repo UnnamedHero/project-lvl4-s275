@@ -16,7 +16,11 @@ html(lang="en")
             li.nav-item.active
               a.nav-link(href=urlFor('allUsers')) Users
           ul.navbar-nav
-            if isSignedIn()
+            if !isSignedIn()
+              li.nav-item
+                a.nav-link(href=urlFor('newTask')) +Add task
+              li.nav-item
+                a.nav-link(href=urlFor('getTasks')) Tasks
               li.nav-item.dropdown
                 a.nav-link.dropdown-toggle#adminDropdown(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Settings
                 .dropdown-menu.position-absolute(aria-labelledby='adminDropdown')

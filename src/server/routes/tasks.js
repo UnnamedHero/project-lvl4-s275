@@ -4,6 +4,8 @@ import { Task, User, TaskStatus, Tag } from '../models'; //eslint-disable-line
 // import { hasErrors, buildErrorsObj } from '../../lib/formErrorObjectBuilder';
 import nameOrEmail from '../../lib/nameOrEmail';
 import { getTags, makeTags } from '../../lib/models/tags';
+import makePaginationItems from '../../lib/pagination';
+
 
 const makeAssignedToList = async (selectedId = 'nobody') => {
   const users = await User.findAll();
@@ -49,28 +51,40 @@ export default (router, { logger }) => {
         assignedToId: assignedToId === 'nobody' ? null : assignedToId,
       };
       try {
+        logger('creating task');
         const task = await creator.createTask(goodForm);
+        logger('gettings tags');
         const tags = await getTags(form.tags);
+        logger('settings tags');
         await task.setTags(tags);
+        logger('task created');
         ctx.flash.set('Task creates successsfully!');
         ctx.redirect('/');
-        return;
       } catch (e) {
-        logger(`task save error: ${JSON.stringify(e, null, ' ')}`);
+        logger(`task save error: ${JSON.stringify(e, null, ' ')}, with this dataset: ${JSON.stringify(goodForm)}`);
         const taskStatuses = await makeTaskStatusesList();
         const assignedTo = await makeAssignedToList();
         ctx.render('tasks/new', { f: buildFormObj(goodForm, e), taskStatuses, assignedTo });
       }
     })
     .get('getTasks', '/tasks', ensureLoggedIn, async (ctx) => {
+      const offset = Number(ctx.request.query.offset) || 0;
+      const limit = Number(ctx.request.query.limit) || 5;
+      const total = await Task.count();
+      const pagination = {
+        items: makePaginationItems(total, offset, limit),
+        urlAlias: 'getTasks',
+      };
       const tasks = await Task.findAll({
+        offset,
+        limit,
         include: [
           { model: User, as: 'creator' },
           { model: User, as: 'assignedTo' },
           { model: TaskStatus, as: 'taskStatus' },
         ],
       });
-      ctx.render('tasks', { tasks });
+      ctx.render('tasks', { tasks, pagination });
     })
     .get('showTask', '/tasks/:id', ensureLoggedIn, async (ctx) => {
       const { id } = ctx.params;
@@ -119,22 +133,21 @@ export default (router, { logger }) => {
         ctx.flash.set(`Task #${id} not found`);
         ctx.redirect(router.url('getTasks'));
       }
+      const { assignedToId } = form;
+      const goodForm = {
+        ...form,
+        assignedToId: assignedToId === 'nobody' ? null : assignedToId,
+      };
+      logger(`new task data: ${JSON.stringify(goodForm)}`);
+
       try {
-        const { assignedToId } = form;
-        const goodForm = {
-          ...form,
-          assignedToId: assignedToId === 'nobody' ? null : assignedToId,
-        };
-        logger(`new task data: ${goodForm}`);
         await task.update(goodForm);
         const tags = await getTags(form.tags);
-        logger('updating tags');
         await task.setTags(tags);
-        logger('tags updated');
         ctx.flash.set('Task edited successsfully!');
         ctx.redirect(router.url('showTask', { id }));
       } catch (e) {
-        logger(`error editing task id ${id} with error: ${JSON.stringify(e)}`);
+        logger(`error editing task id ${id} with error: ${JSON.stringify(e)} with data: ${JSON.stringify(goodForm)}`);
         const taskStatuses = await makeTaskStatusesList(task.taskStatusId);
         const assignedTo = await makeAssignedToList(task.assignedToId);
         task.tags = form.tags;

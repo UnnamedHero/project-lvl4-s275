@@ -5,15 +5,25 @@ import matchers from 'jest-supertest-matchers';
 import app from '../src/server';
 import models, { User, sequelize } from '../src/server/models'; //eslint-disable-line
 import {
-  signUpUser, signInUser, getUserBy, getCookies, getAuthCookies,
+  signUpUser, getUserBy, getAuthCookies,
 } from './helpers';
 
-const makeUser = (userParams = {}) => ({
-  firstName: faker.name.firstName(),
-  lastName: faker.name.lastName(),
-  email: faker.internet.exampleEmail(),
-  ...userParams,
-});
+const emailSet = new Set();
+
+const makeUser = (userParams = {}, ignoreDupe = false) => {
+  const expectedUser = {
+    firstName: faker.name.firstName(),
+    lastName: faker.name.lastName(),
+    email: faker.internet.exampleEmail(),
+    ...userParams,
+  };
+
+  if (!ignoreDupe && emailSet.has(expectedUser.email)) {
+    return makeUser(userParams);
+  }
+  emailSet.add(expectedUser.email);
+  return expectedUser;
+};
 
 beforeAll(async () => {
   jasmine.addMatchers(matchers);
@@ -21,6 +31,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  emailSet.clear();
   await User.destroy({ where: {}, force: true });
 });
 
@@ -32,7 +43,7 @@ describe('Create user', () => {
   });
 
   const user = makeUser();
-  const twinUser = makeUser({ email: user.email });
+  const twinUser = makeUser({ email: user.email }, true);
 
   test('create', async () => {
     await signUpUser(server, user, faker.internet.password());
@@ -101,15 +112,14 @@ describe('Edit user', () => {
         },
       });
 
-    await signInUser(server, user, userPassword);
     const responseWithOldPassword = await request.agent(server)
       .get('/users/profile');
     expect(responseWithOldPassword).toHaveHTTPStatus(302);
 
-    const loginResponseWithNewPassword = await signInUser(server, user, newPassword);
+    const newAuthCookies = await getAuthCookies(server, user, newPassword);
     const responseWithNewPassword = await request.agent(server)
       .get('/users/profile')
-      .set('Cookie', getCookies(loginResponseWithNewPassword));
+      .set('Cookie', newAuthCookies);
     expect(responseWithNewPassword).toHaveHTTPStatus(200);
   });
 

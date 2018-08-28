@@ -6,7 +6,16 @@ import app from '../src/server';
 import { User, TaskStatus, sequelize } from '../src/server/models'; //eslint-disable-line
 import { getAuthCookies, loadFixtures } from './helpers';
 
-const makeTaskStatus = () => ({ name: faker.lorem.word() });
+const taskStatusesSet = new Set();
+
+const makeTaskStatus = () => {
+  const expectedName = faker.lorem.word();
+  if (taskStatusesSet.has(expectedName)) {
+    return makeTaskStatus();
+  }
+  taskStatusesSet.add(expectedName);
+  return { name: expectedName };
+};
 
 const postTaskStatus = async (server, authCookies, taskStatus) => request.agent(server)
   .post('/taskStatuses')
@@ -26,6 +35,7 @@ describe('task statuses CRUD', () => {
   const status = makeTaskStatus();
 
   beforeEach(async () => {
+    taskStatusesSet.clear();
     server = app().listen();
     authCookies = await getAuthCookies(server, { email: 'john.snow@wall.westeross' }, 'js');
   });
