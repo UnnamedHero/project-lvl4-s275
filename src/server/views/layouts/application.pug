@@ -16,7 +16,7 @@ html(lang="en")
             li.nav-item.active
               a.nav-link(href=urlFor('allUsers')) Users
           ul.navbar-nav
-            if !isSignedIn()
+            if isSignedIn()
               li.nav-item
                 a.nav-link(href=urlFor('newTask')) +Add task
               li.nav-item
