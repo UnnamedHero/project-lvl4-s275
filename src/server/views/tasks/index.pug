@@ -16,22 +16,23 @@ block tasks
       .col.align-self-end
         +button(f, 'Search')
   +pagination(pagination, query)
-  table.table.table-bordered.table-striped
-    thead
-      tr
-        th id
-        th Name
-        th Status
-        th Assigned to
-        th Tags
-    tbody
-      each task in tasks
-        tr
-          td
-            a(href= urlFor('showTask', { id: task.id }))= `#${task.id}`
-          td= task.name
-          td= task.taskStatus.name          
-          td= nameOrEmail(task.assignedTo)
-          td
-            each tag in task.Tags
-              span.mr-1.badge.badge-secondary= tag.name
+  .contained
+    table.table.table-bordered.table-striped
+      thead
+        tr.d-flex
+          th.col-1 id
+          th.col-4 Name
+          th.col-2 Status
+          th.col-2 Assigned to
+          th.col-3 Tags
+      tbody
+        each task in tasks
+          tr.d-flex
+            td.col-1
+              a(href= urlFor('showTask', { id: task.id }))= `#${task.id}`
+            td.col-4.text-truncate= task.name
+            td.col-2= task.taskStatus.name          
+            td.col-2= nameOrEmail(task.assignedTo)
+            td.col-3
+              each tag in task.Tags
+                span.mr-1.badge.badge-secondary= tag.name

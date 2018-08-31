@@ -1,17 +1,17 @@
-//- TODO: implement proper form for filter table
 - const getInputName = (f, property) => f.name !== '' ? `${f.name}[${property}]` : property
 //- TODO: add proper input label naming
 mixin formFor(f, options = {})
   - const url = _.get(options, 'url');
   - const method = _.get(options, 'method', 'get').toLowerCase();
-  - const isStandart = _.includes(['get', 'post'], method);
+  - const isStandart = _.includes(['get', 'post'], method);  
   form(action= url method= isStandart ? method : 'post')
     if !isStandart
       input(name='_method' type='hidden' value= method)
+    small Fields marked with * are required!
     block
 
 mixin input(f, property, options = { as: 'text', required: false })
-  - const value = f.object[property] === undefined ? '' : f.object[property]
+  - const value = f.object[property] === undefined ? '' : f.object[property]  
   .form-group
     label= `${property}${options.required ? '*' : ''}`
     input(name=getInputName(f, property) class=`form-control ${(f.errors[property] && 'is-invalid')}` type=options['as'] value=`${value}` required = options.required)
