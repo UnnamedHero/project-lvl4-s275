@@ -3,9 +3,10 @@ include /mixins/forms.pug
 doctype html
 html(lang="en")
   head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
     title= Title
-    script(src='/assets/vendor.js')
-    script(src='/assets/app.js')    
+    script(src='/assets/main.js')  
   body
     nav.navbar.navbar-expand-sm.navbar-light.bg-faded
       .container
@@ -15,16 +16,22 @@ html(lang="en")
         .collapse.navbar-collapse#navbarSupportedContent
           ul.navbar-nav.mr-auto
             li.nav-item.active
-              a.nav-link(href=urlFor('users')) Users
+              a.nav-link(href=urlFor('allUsers')) Users
           ul.navbar-nav
             if isSignedIn()
+              li.nav-item
+                a.nav-link(href=urlFor('newTask')) +Add task
+              li.nav-item
+                a.nav-link(href=urlFor('getTasks')) Tasks
+              li.nav-item.dropdown
+                a.nav-link.dropdown-toggle#adminDropdown(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Settings
+                .dropdown-menu.position-absolute(aria-labelledby='adminDropdown')
+                  a.dropdown-item(href=urlFor('getTaskStatuses')) Task Statuses
               li.nav-item.dropdown
                 a.nav-link.dropdown-toggle#profileDropdown(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false') Profile
                 .dropdown-menu.position-absolute(aria-labelledby='profileDropdown')
-                  a.dropdown-item(href=urlFor('editCurrentUser')) Edit profile
+                  a.dropdown-item(href=urlFor('getCurrentUserProfile')) Edit profile
                   a.dropdown-item(href=urlFor('changeCurrentUserPassword')) Change password
-                  .dropdown-divider
-                  a.dropdown-item(href=urlFor('deleteCurrentUser') data-method='delete' rel='nofollow') Delete profile
                   .dropdown-divider
                   a.dropdown-item(href=urlFor('session') data-method='delete' rel='nofollow') Sign Out
             else

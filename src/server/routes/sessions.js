@@ -1,6 +1,7 @@
 import buildFormObj from '../../lib/formObjectBuilder';
 import { encrypt } from '../../lib/secure';
 import { User } from '../models'; //eslint-disable-line
+import { hasErrors, buildErrorsObj } from '../../lib/formErrorObjectBuilder';
 
 export default (router, { logger }) => {
   router
@@ -15,15 +16,23 @@ export default (router, { logger }) => {
           email,
         },
       });
-      if (user && user.passwordDigest === encrypt(password)) {
-        ctx.session.userId = user.id;
-        ctx.redirect(router.url('root'));
-        logger(`${user.email} logged in, id: ${ctx.session.userId}`);
+
+      const errors = { };
+      if (!user) {
+        errors.email = 'User does not exist';
+      }
+      if (user && user.passwordDigest !== encrypt(password)) {
+        errors.password = 'Wrong password';
+      }
+      if (hasErrors(errors)) {
+        ctx.render('sessions/new', { f: buildFormObj({ email }, buildErrorsObj(errors)) });
+        logger(`SignIn errors: ${JSON.stringify(errors)}`);
         return;
       }
-      logger(`user ${email} NOT logged in`);
-      ctx.flash.set('email or password were wrong');
-      ctx.render('sessions/new', { f: buildFormObj({ email }) });
+
+      ctx.session.userId = user.id;
+      ctx.redirect(router.url('root'));
+      logger(`${user.email} logged in, id: ${ctx.session.userId}`);
     })
     .delete('session', '/session', (ctx) => {
       ctx.session = {};

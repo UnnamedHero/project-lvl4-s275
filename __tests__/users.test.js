@@ -3,43 +3,27 @@ import faker from 'faker';
 import matchers from 'jest-supertest-matchers';
 
 import app from '../src/server';
-import { User, sequelize } from '../src/server/models'; //eslint-disable-line
+import models, { User, sequelize } from '../src/server/models'; //eslint-disable-line
+import {
+  signUpUser, getUserBy, getAuthCookies,
+} from './helpers';
 
-const getCookies = res => res.headers['set-cookie'][0]
-  .split(',')
-  .map(item => item.split(';')[0])
-  .join(';');
+const emailSet = new Set();
 
-const makeUser = (userParams = {}) => ({
-  firstName: faker.name.firstName(),
-  lastName: faker.name.lastName(),
-  email: faker.internet.email(),
-  ...userParams,
-});
+const makeUser = (userParams = {}, ignoreDupe = false) => {
+  const expectedUser = {
+    firstName: faker.name.firstName(),
+    lastName: faker.name.lastName(),
+    email: faker.internet.exampleEmail(),
+    ...userParams,
+  };
 
-const signUpUser = async (server, user, password) => request.agent(server)
-  .post('/users')
-  .send({
-    form: {
-      ...user,
-      password,
-    },
-  });
-
-const signInUser = async (server, user, password) => request.agent(server)
-  .post('/session')
-  .send({
-    form: {
-      email: user.email,
-      password,
-    },
-  });
-
-const getUserBy = async params => User.findOne({
-  where: {
-    ...params,
-  },
-});
+  if (!ignoreDupe && emailSet.has(expectedUser.email)) {
+    return makeUser(userParams);
+  }
+  emailSet.add(expectedUser.email);
+  return expectedUser;
+};
 
 beforeAll(async () => {
   jasmine.addMatchers(matchers);
@@ -47,6 +31,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
+  emailSet.clear();
   await User.destroy({ where: {}, force: true });
 });
 
@@ -58,7 +43,7 @@ describe('Create user', () => {
   });
 
   const user = makeUser();
-  const twinUser = makeUser({ email: user.email });
+  const twinUser = makeUser({ email: user.email }, true);
 
   test('create', async () => {
     await signUpUser(server, user, faker.internet.password());
@@ -92,32 +77,18 @@ describe('Edit user', () => {
 
   test('edit user while not signed in', async () => {
     const response = await request.agent(server)
-      .get('/users/currentUser');
+      .get('/users/profile');
     expect(response).toHaveHTTPStatus(302);
   });
 
-  test('hacker try to edit victim user', async () => {
-    const response = await signInUser(server, hackerUser, hackerUserPassword);
-    const victimUser = await getUserBy({ email: user.email });
-    await request.agent(server)
-      .patch(`/users/${victimUser.id}`)
-      .set('Cookie', getCookies(response))
-      .send({
-        form: {
-          ...makeUser(),
-        },
-      });
-    const expectedUser = await getUserBy({ id: victimUser.id });
-    expect(expectedUser).toEqual(victimUser);
-  });
-
   test('edit self', async () => {
-    const response = await signInUser(server, user, userPassword);
+    const authCookies = await getAuthCookies(server, user, userPassword);
     const signedInUser = await getUserBy({ email: user.email });
     const newUserData = makeUser();
+
     await request.agent(server)
-      .patch(`/users/${signedInUser.id}`)
-      .set('Cookie', getCookies(response))
+      .patch('/users/profile')
+      .set('Cookie', authCookies)
       .send({
         form: {
           ...newUserData,
@@ -128,12 +99,11 @@ describe('Edit user', () => {
   });
 
   test('change password', async () => {
-    const response = await signInUser(server, user, userPassword);
-    const signedInUser = await getUserBy({ email: user.email });
+    const authCookies = await getAuthCookies(server, user, userPassword);
     const newPassword = faker.internet.password();
     await request.agent(server)
-      .patch(`/users/${signedInUser.id}/password`)
-      .set('Cookie', getCookies(response))
+      .patch('/users/profile/password')
+      .set('Cookie', authCookies)
       .send({
         form: {
           password: userPassword,
@@ -142,17 +112,14 @@ describe('Edit user', () => {
         },
       });
 
-    const loginResponseWithOldPasssword = await signInUser(server, user, userPassword);
     const responseWithOldPassword = await request.agent(server)
-      .get('/users/currentUser')
-      .set('Cookie', getCookies(loginResponseWithOldPasssword));
-    console.log(responseWithOldPassword.status);
+      .get('/users/profile');
     expect(responseWithOldPassword).toHaveHTTPStatus(302);
 
-    const loginResponseWithNewPassword = await signInUser(server, user, newPassword);
+    const newAuthCookies = await getAuthCookies(server, user, newPassword);
     const responseWithNewPassword = await request.agent(server)
-      .get('/users/CurrentUser')
-      .set('Cookie', getCookies(loginResponseWithNewPassword));
+      .get('/users/profile')
+      .set('Cookie', newAuthCookies);
     expect(responseWithNewPassword).toHaveHTTPStatus(200);
   });
 
@@ -162,13 +129,13 @@ describe('Edit user', () => {
     expect(usersListAtStart).toHaveLength(usersCount);
 
     const notSignedInResponse = await request.agent(server)
-      .delete('/user');
+      .delete('/users');
     expect(notSignedInResponse).toHaveHTTPStatus(302);
 
-    const response = await signInUser(server, hackerUser, hackerUserPassword);
+    const authCookies = await getAuthCookies(server, hackerUser, hackerUserPassword);
     await request.agent(server)
-      .delete('/user')
-      .set('Cookie', getCookies(response));
+      .delete('/users')
+      .set('Cookie', authCookies);
     const usersListAfterDeletion = await User.findAll();
     expect(usersListAfterDeletion).toHaveLength(usersCount - 1);
   });
