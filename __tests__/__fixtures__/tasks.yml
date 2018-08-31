@@ -22,5 +22,5 @@ fixtures:
       description: Task 3 description
       creatorId: 2
       assignedToId: 2
-      Tag: [1, 2, 3]
+      Tags: [1, 2, 3]
       
