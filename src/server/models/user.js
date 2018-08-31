@@ -8,7 +8,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true,
       validate: {
-        isEmail: true,
+        isEmail: {
+          arg: true,
+          msg: 'Invalid email address',
+        },
       },
     },
     passwordDigest: {
