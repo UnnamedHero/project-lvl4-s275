@@ -44,8 +44,6 @@ export default (router, { logger }) => {
       }
     })
     .delete('deleteTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
-      // const totalTaskStatuses = await TaskStatus.count();
-
       const { id } = ctx.params;
       if (id === String(1)) {
         ctx.flash.set('Cannot delete first task status.');
@@ -55,11 +53,14 @@ export default (router, { logger }) => {
 
       const taskStatus = await TaskStatus.findById(id);
       try {
-        const fallbackTaskStatus = await TaskStatus.findById(1);
-        await Task.update({ taskStatusId: 1 }, { where: { taskStatusId: taskStatus.id } });
-        await taskStatus.destroy();
-        ctx.flash.set(`Task status ${taskStatus.name} deleted. Affected tasks status set to '${fallbackTaskStatus.name}'`);
-        logger(`Task status deleted ${id}: ${taskStatus.name}`);
+        const affectedTasksCount = await Task.count({ where: { taskStatusId: taskStatus.id } });
+        if (affectedTasksCount > 0) {
+          ctx.flash.set(`Delete error. Task status ${taskStatus.name} is used within ${affectedTasksCount} tasks.`);
+        } else {
+          await taskStatus.destroy();
+          ctx.flash.set(`Task status ${taskStatus.name} deleted.`);
+          logger(`Task status deleted ${id}: ${taskStatus.name}`);
+        }
       } catch (e) {
         ctx.flash.set(`Task status ${taskStatus.name} NOT deleted!!!`);
         logger(`Task status NOT deleted ${id}: ${taskStatus.name} reason: ${JSON.stringify(e)}`);
