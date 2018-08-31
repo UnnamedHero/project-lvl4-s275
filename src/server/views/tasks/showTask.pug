@@ -29,7 +29,10 @@ block tasks
         td= nameOrEmail(task.assignedTo)
       tr
         th.w-25(scope='row') Tags
-        td= task.tags
+        td
+          //- TODO: tag class?
+          each tag in task.Tags
+            span.mr-1.badge.badge-secondary= tag.name
 
   - const modalId = `taskId${task.id}`
   a.btn.btn-sm(href=urlFor('editTask', { id: task.id }) role='button') Edit
