@@ -1,7 +1,7 @@
 import uniq from 'lodash/uniq';
 import { Tag } from '../../server/models'; //eslint-disable-line
 
-const getTagsFromString = str => uniq(str
+export const getTagsFromString = str => uniq(str
   .split(' ')
   .map(tagName => tagName.trim())
   .filter(tag => tag));

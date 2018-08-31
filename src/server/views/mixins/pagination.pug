@@ -1,11 +1,7 @@
-//-  total, maxPages, offset, limit, current: actualPage,
-mixin pagination(pagination)
+mixin pagination(pagination, searchQuery = {})  
   nav(aria-label='pagination')
     ul.pagination
       for item in pagination.items
+        - const query = Object.assign({}, searchQuery, item.query)
         li.page-item(class=`${item.disabled ? 'disabled' : ''}`)
-          a.page-link(href= urlFor(pagination.urlAlias, { query: item.query }))= item.value
-
-
-
-
+          a.page-link(href= urlFor(pagination.urlAlias, { query }))= item.value

@@ -27,6 +27,10 @@ Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }
+
+  if (db[modelName].loadScopes) {
+    db[modelName].loadScopes(db);
+  }
 });
 
 db.sequelize = sequelize;

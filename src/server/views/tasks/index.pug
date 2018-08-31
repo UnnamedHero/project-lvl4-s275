@@ -2,21 +2,37 @@ extends /layouts/tasks.pug
 include /mixins/pagination.pug
 
 block tasks
-  +pagination(pagination)
+  //- TODO: add collapse
+  - const f = { object: { tags }, errors: {} }
+  form(action= urlFor('getTasks') method='get')
+    .form-row
+      .col
+        +select(f, 'createdBy', { items: users })
+      .col
+        +select(f, 'taskStatus', { items: taskStatuses })
+      .col
+        +select(f, 'assignedTo', { items: assignedTo })
+      .col
+        +input(f, 'tags')
+      .col.align-self-end
+        +button(f, 'Search')
+  +pagination(pagination, query)
   table.table.table-bordered.table-striped
     thead
       tr
         th id
         th Name
-        th Description
         th Status
         th Assigned to
+        th Tags
     tbody
       each task in tasks
         tr
           td
             a(href= urlFor('showTask', { id: task.id }))= `#${task.id}`
           td= task.name
-          td= task.description
           td= task.taskStatus.name          
           td= nameOrEmail(task.assignedTo)
+          td
+            each tag in task.Tags
+              span.mr-1.badge.badge-secondary= tag.name

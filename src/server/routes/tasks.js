@@ -1,49 +1,129 @@
+import find from 'lodash/find';
 import buildFormObj from '../../lib/formObjectBuilder';
 import { ensureLoggedIn } from '../../lib/middlewares';
-import { Task, User, TaskStatus, Tag } from '../models'; //eslint-disable-line
+import { Task, User, TaskStatus, Tag, sequelize } from '../models'; //eslint-disable-line
 // import { hasErrors, buildErrorsObj } from '../../lib/formErrorObjectBuilder';
 import nameOrEmail from '../../lib/nameOrEmail';
-import { getTags, makeTags } from '../../lib/models/tags';
+import { getTags, makeTags, getTagsFromString } from '../../lib/models/tags';
 import makePaginationItems from '../../lib/pagination';
 
+const makeUsersList = (users, currentUserId) => {
+  const otherUsers = users
+    .filter(user => String(user.id) !== currentUserId)
+    .map((user) => {
+      const { id } = user;
+      const name = nameOrEmail(user);
+      return ({ id, name });
+    });
 
-const makeAssignedToList = async (selectedId = 'nobody') => {
-  const users = await User.findAll();
-  const usersWithSelecled = users.map((user) => {
-    const { id } = user;
-    const name = nameOrEmail(user);
-    const selected = selectedId === user.id;
-    return ({ id, name, selected });
-  });
-  const nobody = {
-    id: 'nobody', name: 'Nobody', selected: selectedId === 'nobody',
+  const currentUser = {
+    id: currentUserId,
+    name: 'Me',
   };
-  return [nobody, ...usersWithSelecled];
+  return [currentUser, ...otherUsers];
+};
+
+const makeFilterUser = (name, selectedId) => {
+  const id = name.toLowerCase();
+  return {
+    id,
+    name,
+    selected: selectedId === id,
+  };
+};
+
+const makeCreatedByList = (users, selectedId = 'any') => {
+  const usersForSelect = users.map(user => ({
+    ...user,
+    selected: String(user.id) === selectedId,
+  }));
+  return [
+    makeFilterUser('Any', selectedId),
+    ...usersForSelect,
+  ];
+};
+
+const makeAssignedToList = (users, selectedId = 'any') => {
+  const [any, ...others] = makeCreatedByList(users, selectedId);
+  return [
+    any,
+    makeFilterUser('Nobody', selectedId),
+    ...others,
+  ];
 };
 
 const makeTaskStatusesList = async (selectedId) => {
   const taskStatuses = await TaskStatus.findAll();
-  const realSelectedId = selectedId || taskStatuses[0].id;
+  const realSelectedId = selectedId || String(taskStatuses[0].id);
   const taskStatusesWithSelected = taskStatuses.map(taskStatus => ({
     id: taskStatus.id,
     name: taskStatus.name,
-    selected: realSelectedId === taskStatus.id,
+    selected: realSelectedId === String(taskStatus.id),
   }));
   return taskStatusesWithSelected;
 };
+
+const prependAnyTo = (list, selectedId = 'nobody') => [
+  {
+    id: 'any', name: 'Any', selected: selectedId === 'any',
+  },
+  ...list,
+];
+
+const makeSearchTaskStatusList = async (selectedId) => {
+  const list = await makeTaskStatusesList(selectedId);
+  return prependAnyTo(list, selectedId);
+};
+
+const scopeTable = [
+  {
+    name: 'createdBy',
+    getScope: value => (value === 'any'
+      ? null
+      : { method: ['creator', value] }),
+  },
+  {
+    name: 'taskStatus',
+    getScope: value => (value === 'any'
+      ? null
+      : { method: ['taskStatus', value] }),
+  },
+  {
+    name: 'assignedTo',
+    getScope: value => (value === 'any'
+      ? null
+      : { method: ['assignedTo', value === 'nobody' ? null : value] }),
+  },
+  {
+    name: 'tags',
+    getScope: (value) => {
+      const tags = getTagsFromString(value);
+      return tags.length === 0
+        ? null
+        : { method: ['tags', tags] };
+    },
+  },
+];
+
+const getTaskScopes = request => Object.keys(request)
+  .reduce((acc, attr) => {
+    const scopeObj = find(scopeTable, { name: attr });
+    return scopeObj ? [...acc, scopeObj.getScope(request[attr])] : acc;
+  }, ['defaultTagScope'])
+  .filter(s => s);
 
 export default (router, { logger }) => {
   router
     .get('newTask', '/tasks/new', ensureLoggedIn, async (ctx) => {
       const task = Task.build();
       const taskStatuses = await makeTaskStatusesList();
-      const assignedTo = await makeAssignedToList();
+      const { assignedTo } = await makeUsersList(ctx.session.userId);
       ctx.render('tasks/new', { f: buildFormObj(task), taskStatuses, assignedTo });
     })
     .post('publishTask', '/tasks', ensureLoggedIn, async (ctx) => {
       const { form } = ctx.request.body;
-
-      const creator = await User.findOne({ where: { id: 1 } });
+      const id = ctx.session.userId;
+      const creator = await User.findById(id);
 
       const { assignedToId } = form;
       const goodForm = {
@@ -51,31 +131,24 @@ export default (router, { logger }) => {
         assignedToId: assignedToId === 'nobody' ? null : assignedToId,
       };
       try {
-        logger('creating task');
         const task = await creator.createTask(goodForm);
-        logger('gettings tags');
         const tags = await getTags(form.tags);
-        logger('settings tags');
         await task.setTags(tags);
-        logger('task created');
         ctx.flash.set('Task creates successsfully!');
         ctx.redirect('/');
       } catch (e) {
         logger(`task save error: ${JSON.stringify(e, null, ' ')}, with this dataset: ${JSON.stringify(goodForm)}`);
         const taskStatuses = await makeTaskStatusesList();
-        const assignedTo = await makeAssignedToList();
+        const { assignedTo } = await makeUsersList(id);
         ctx.render('tasks/new', { f: buildFormObj(goodForm, e), taskStatuses, assignedTo });
       }
     })
     .get('getTasks', '/tasks', ensureLoggedIn, async (ctx) => {
       const offset = Number(ctx.request.query.offset) || 0;
       const limit = Number(ctx.request.query.limit) || 5;
-      const total = await Task.count();
-      const pagination = {
-        items: makePaginationItems(total, offset, limit),
-        urlAlias: 'getTasks',
-      };
-      const tasks = await Task.findAll({
+      const { query } = ctx.request;
+      const scopes = getTaskScopes(query);
+      const { count, rows: tasks } = await Task.scope(scopes).findAndCountAll({
         offset,
         limit,
         include: [
@@ -83,8 +156,31 @@ export default (router, { logger }) => {
           { model: User, as: 'assignedTo' },
           { model: TaskStatus, as: 'taskStatus' },
         ],
+        distinct: true,
       });
-      ctx.render('tasks', { tasks, pagination });
+      const { userId } = ctx.session;
+      const users = await User.findAll();
+      const usersList = makeUsersList(users, userId);
+      const createdBy = makeCreatedByList(usersList, query.createdBy);
+      const assignedTo = makeAssignedToList(usersList, query.assignedTo);
+
+      const currentTaskStatus = query.taskStatus || 'any';
+      const taskStatuses = await makeSearchTaskStatusList(currentTaskStatus);
+
+      const pagination = {
+        items: makePaginationItems(count, offset, limit),
+        urlAlias: 'getTasks',
+      };
+
+      ctx.render('tasks', {
+        tasks,
+        pagination,
+        users: createdBy,
+        assignedTo,
+        taskStatuses,
+        tags: query.tags,
+        query,
+      });
     })
     .get('showTask', '/tasks/:id', ensureLoggedIn, async (ctx) => {
       const { id } = ctx.params;
@@ -103,7 +199,7 @@ export default (router, { logger }) => {
         ctx.redirect(router.url('getTasks'));
         return;
       }
-      task.tags = makeTags(task.Tags);
+      // task.tags = makeTags(task.Tags);
       ctx.render('tasks/showTask', { task });
     })
     .get('editTask', '/tasks/:id/edit', ensureLoggedIn, async (ctx) => {
@@ -117,8 +213,9 @@ export default (router, { logger }) => {
         ctx.flash.set(`Task id ${id} not found}`);
         ctx.redirect(router.url('getTasks'));
       }
+      const { userId } = ctx.session;
       const taskStatuses = await makeTaskStatusesList(task.taskStatusId);
-      const assignedTo = await makeAssignedToList(task.assignedToId);
+      const { assignedTo } = await makeUsersList(userId, task.assignedToId);
       task.tags = makeTags(task.Tags);
       ctx.render('tasks/edit', {
         f: buildFormObj(task), id, taskStatuses, assignedTo,
@@ -148,8 +245,9 @@ export default (router, { logger }) => {
         ctx.redirect(router.url('showTask', { id }));
       } catch (e) {
         logger(`error editing task id ${id} with error: ${JSON.stringify(e)} with data: ${JSON.stringify(goodForm)}`);
+        const { userId } = ctx.session;
         const taskStatuses = await makeTaskStatusesList(task.taskStatusId);
-        const assignedTo = await makeAssignedToList(task.assignedToId);
+        const { assignedTo } = await makeUsersList(userId, task.assignedToId);
         task.tags = form.tags;
         ctx.render('tasks/edit', {
           f: buildFormObj(task, e), id, taskStatuses, assignedTo,
@@ -158,10 +256,7 @@ export default (router, { logger }) => {
     })
     .delete('deleteTask', '/tasks/:id', ensureLoggedIn, async (ctx) => {
       const { id } = ctx.params;
-      // TODO: byId
-      const task = await Task.findOne({
-        where: { id },
-      });
+      const task = await Task.findById(id);
       if (!task) {
         ctx.status = 404;
         ctx.redirect(router.url('getTasks'));
