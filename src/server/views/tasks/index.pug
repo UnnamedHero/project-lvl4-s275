@@ -3,8 +3,7 @@ include /mixins/pagination.pug
 
 block tasks
   //- TODO: add collapse
-  - const f = { object: { tags }, errors: {} }
-  form(action= urlFor('getTasks') method='get')
+  +formFor(f, { url:urlFor('getTasks'), method:'get'})
     .form-row
       .col
         +select(f, 'createdBy', { items: users })

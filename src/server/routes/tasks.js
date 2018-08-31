@@ -2,78 +2,10 @@ import find from 'lodash/find';
 import buildFormObj from '../../lib/formObjectBuilder';
 import { ensureLoggedIn } from '../../lib/middlewares';
 import { Task, User, TaskStatus, Tag, sequelize } from '../models'; //eslint-disable-line
-// import { hasErrors, buildErrorsObj } from '../../lib/formErrorObjectBuilder';
-import nameOrEmail from '../../lib/nameOrEmail';
-import { getTags, makeTags, getTagsFromString } from '../../lib/models/tags';
+import { makeUserLists, makeTaskStatusLists } from '../../lib/models/tasks';
+import { getTags, makeTagsString, getTagsFromString } from '../../lib/models/tags';
 import makePaginationItems from '../../lib/pagination';
-
-const makeUsersList = (users, currentUserId) => {
-  const otherUsers = users
-    .filter(user => String(user.id) !== String(currentUserId))
-    .map((user) => {
-      const { id } = user;
-      const name = nameOrEmail(user);
-      return ({ id, name });
-    });
-
-  const currentUser = {
-    id: currentUserId,
-    name: 'Me',
-  };
-  return [currentUser, ...otherUsers];
-};
-
-const makeFilterUser = (name, selectedId) => {
-  const id = name.toLowerCase();
-  return {
-    id,
-    name,
-    selected: selectedId === id,
-  };
-};
-
-const makeCreatedByList = (users, selectedId = 'any') => {
-  const usersForSelect = users.map(user => ({
-    ...user,
-    selected: String(user.id) === selectedId,
-  }));
-  return [
-    makeFilterUser('Any', selectedId),
-    ...usersForSelect,
-  ];
-};
-
-const makeAssignedToList = (users, selectedId = 'any') => {
-  const [any, ...others] = makeCreatedByList(users, selectedId);
-  return [
-    any,
-    makeFilterUser('Nobody', selectedId),
-    ...others,
-  ];
-};
-
-const makeTaskStatusesList = async (selectedId) => {
-  const taskStatuses = await TaskStatus.findAll();
-  const realSelectedId = selectedId || String(taskStatuses[0].id);
-  const taskStatusesWithSelected = taskStatuses.map(taskStatus => ({
-    id: taskStatus.id,
-    name: taskStatus.name,
-    selected: realSelectedId === String(taskStatus.id),
-  }));
-  return taskStatusesWithSelected;
-};
-
-const prependAnyTo = (list, selectedId = 'nobody') => [
-  {
-    id: 'any', name: 'Any', selected: selectedId === 'any',
-  },
-  ...list,
-];
-
-const makeSearchTaskStatusList = async (selectedId) => {
-  const list = await makeTaskStatusesList(selectedId);
-  return prependAnyTo(list, selectedId);
-};
+import { buildErrorsObj, hasErrors } from '../../lib/formErrorObjectBuilder';
 
 const scopeTable = [
   {
@@ -116,14 +48,16 @@ export default (router, { logger }) => {
   router
     .get('newTask', '/tasks/new', ensureLoggedIn, async (ctx) => {
       const task = Task.build();
-      const taskStatuses = await makeTaskStatusesList();
-      const { assignedTo } = await makeUsersList(ctx.session.userId);
+      const { taskStatuses } = await makeTaskStatusLists();
+      const users = await User.findAll();
+      const { userId } = ctx.session;
+      const { assignedTo } = makeUserLists(users, userId, 'nobody');
       ctx.render('tasks/new', { f: buildFormObj(task), taskStatuses, assignedTo });
     })
     .post('publishTask', '/tasks', ensureLoggedIn, async (ctx) => {
       const { form } = ctx.request.body;
-      const id = ctx.session.userId;
-      const creator = await User.findById(id);
+      const { userId } = ctx.session;
+      const creator = await User.findById(userId);
 
       const { assignedToId } = form;
       const goodForm = {
@@ -138,8 +72,9 @@ export default (router, { logger }) => {
         ctx.redirect('/');
       } catch (e) {
         logger(`task save error: ${JSON.stringify(e, null, ' ')}, with this dataset: ${JSON.stringify(goodForm)}`);
-        const taskStatuses = await makeTaskStatusesList();
-        const { assignedTo } = await makeUsersList(id);
+        const { taskStatuses } = await makeTaskStatusLists(form.taskStatusId);
+        const users = await User.findAll();
+        const { assignedTo } = makeUserLists(users, userId, assignedToId);
         ctx.render('tasks/new', { f: buildFormObj(goodForm, e), taskStatuses, assignedTo });
       }
     })
@@ -160,24 +95,34 @@ export default (router, { logger }) => {
       });
       const { userId } = ctx.session;
       const users = await User.findAll();
-      const usersList = makeUsersList(users, userId);
-      const createdBy = makeCreatedByList(usersList, query.createdBy);
-      const assignedTo = makeAssignedToList(usersList, query.assignedTo);
+      const { createdBy } = makeUserLists(users, userId, query.createdBy);
+      const { assignedToForFilter } = makeUserLists(users, userId, query.assignedTo);
 
       const currentTaskStatus = query.taskStatus || 'any';
-      const taskStatuses = await makeSearchTaskStatusList(currentTaskStatus);
+      const { taskStatusesForFilter } = await makeTaskStatusLists(currentTaskStatus);
 
       const pagination = {
         items: makePaginationItems(count, offset, limit),
         urlAlias: 'getTasks',
       };
 
+      const searchForm = {
+        createdBy,
+        assignedTo: assignedToForFilter,
+        taskStatuses: taskStatusesForFilter,
+        tags: query.tags,
+      };
+      const f = buildFormObj(searchForm);
+      f.name = '';
+
+      searchForm.name = null;
       ctx.render('tasks', {
+        f,
         tasks,
         pagination,
         users: createdBy,
-        assignedTo,
-        taskStatuses,
+        assignedTo: assignedToForFilter,
+        taskStatuses: taskStatusesForFilter,
         tags: query.tags,
         query,
       });
@@ -194,12 +139,10 @@ export default (router, { logger }) => {
         ],
       });
       if (!task) {
-        ctx.status = 404;
         ctx.flash.set(`Task id#${id} not found`);
         ctx.redirect(router.url('getTasks'));
         return;
       }
-      // task.tags = makeTags(task.Tags);
       ctx.render('tasks/showTask', { task });
     })
     .get('editTask', '/tasks/:id/edit', ensureLoggedIn, async (ctx) => {
@@ -209,14 +152,14 @@ export default (router, { logger }) => {
         include: [{ model: Tag, through: 'TaskTags' }],
       });
       if (!task) {
-        ctx.status = 404;
         ctx.flash.set(`Task id ${id} not found}`);
         ctx.redirect(router.url('getTasks'));
       }
       const { userId } = ctx.session;
-      const taskStatuses = await makeTaskStatusesList(task.taskStatusId);
-      const { assignedTo } = await makeUsersList(userId, task.assignedToId);
-      task.tags = makeTags(task.Tags);
+      const { taskStatuses } = await makeTaskStatusLists(task.taskStatusId);
+      const users = await User.findAll();
+      const { assignedTo } = await makeUserLists(users, userId, task.assignedToId);
+      task.tags = makeTagsString(task.Tags);
       ctx.render('tasks/edit', {
         f: buildFormObj(task), id, taskStatuses, assignedTo,
       });
@@ -226,7 +169,6 @@ export default (router, { logger }) => {
       const { form } = ctx.request.body;
       const task = await Task.findById(id);
       if (!task) {
-        ctx.status = 404;
         ctx.flash.set(`Task #${id} not found`);
         ctx.redirect(router.url('getTasks'));
       }
@@ -238,6 +180,16 @@ export default (router, { logger }) => {
       logger(`new task data: ${JSON.stringify(goodForm)}`);
 
       try {
+        const tagsArray = getTagsFromString(form.tags);
+        const errors = {};
+        if (tagsArray.length === 0) {
+          errors.tags = 'Tag cannot be empty';
+        }
+
+        if (hasErrors(errors)) {
+          throw buildErrorsObj(errors);
+        }
+
         await task.update(goodForm);
         const tags = await getTags(form.tags);
         await task.setTags(tags);
@@ -246,9 +198,9 @@ export default (router, { logger }) => {
       } catch (e) {
         logger(`error editing task id ${id} with error: ${JSON.stringify(e)} with data: ${JSON.stringify(goodForm)}`);
         const { userId } = ctx.session;
-        const taskStatuses = await makeTaskStatusesList(task.taskStatusId);
-        const { assignedTo } = await makeUsersList(userId, task.assignedToId);
-        task.tags = form.tags;
+        const { taskStatuses } = await makeTaskStatusLists(task.taskStatusId);
+        const users = await User.findAll();
+        const { assignedTo } = await makeUserLists(users, userId, task.assignedToId);
         ctx.render('tasks/edit', {
           f: buildFormObj(task, e), id, taskStatuses, assignedTo,
         });

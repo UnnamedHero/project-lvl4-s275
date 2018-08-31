@@ -4,6 +4,12 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true,
       allowNull: false,
+      validate: {
+        notEmpty: {
+          arg: true,
+          msg: 'Value cannot be empty',
+        },
+      },
     },
   });
   TaskStatus.assosiate = (models) => {

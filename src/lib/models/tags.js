@@ -26,4 +26,4 @@ export const getTags = async (stringOfTags) => {
   return tags;
 };
 
-export const makeTags = tags => tags.map(tag => tag.name).join(' ');
+export const makeTagsString = tags => tags.map(tag => tag.name).join(' ');

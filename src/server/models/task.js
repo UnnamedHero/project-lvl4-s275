@@ -3,6 +3,12 @@ export default (sequelize, DataTypes) => {
     name: {
       type: DataTypes.STRING,
       allowNull: false,
+      validate: {
+        notEmpty: {
+          arg: true,
+          msg: 'Value cannot be empty',
+        },
+      },
     },
     description: DataTypes.TEXT,
   }, {
