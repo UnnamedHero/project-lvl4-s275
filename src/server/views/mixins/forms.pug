@@ -1,4 +1,5 @@
-- const getInputName = (f, property) => `${f.name}[${property}]`
+//- TODO: implement proper form for filter table
+- const getInputName = (f, property) => f.name ? `${f.name}[${property}]` : property
 //- TODO: add proper input label naming
 mixin formFor(f, options = {})
   - const url = _.get(options, 'url');
