@@ -3,7 +3,7 @@ import faker from 'faker';
 import matchers from 'jest-supertest-matchers';
 
 import app from '../src/server';
-import { User, TaskStatus, sequelize } from '../src/server/models'; //eslint-disable-line
+import { User, TaskStatus, Task, sequelize } from '../src/server/models'; //eslint-disable-line
 import { getAuthCookies, loadFixtures } from './helpers';
 
 const taskStatusesSet = new Set();
@@ -25,7 +25,6 @@ const postTaskStatus = async (server, authCookies, taskStatus) => request.agent(
 beforeAll(async () => {
   jasmine.addMatchers(matchers);
   await User.sync({ force: true });
-  // await TaskStatus.sync({ force: true });
   await loadFixtures(['users.yml']);
 });
 
@@ -66,7 +65,8 @@ describe('task statuses CRUD', () => {
   });
 
   test('delete', async () => {
-    await loadFixtures(['taskStatuses.yml', 'tags.yml', 'tasks.yml']);
+    await Task.sync();
+    await loadFixtures(['taskStatuses.yml']);
     const id = 2;
     await request.agent(server)
       .delete(`/taskStatuses/${id}`)
