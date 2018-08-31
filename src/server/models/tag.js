@@ -4,7 +4,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
-        notEmpty: true,
+        notEmpty: {
+          arg: true,
+          msg: 'Value cannot be empty',
+        },
       },
     },
   }, {});
