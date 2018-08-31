@@ -1,8 +1,6 @@
 import buildFormObj from '../../lib/formObjectBuilder';
 import { ensureLoggedIn } from '../../lib/middlewares';
-import { TaskStatus } from '../models'; //eslint-disable-line
-
-const getTaskStatusById = async id => TaskStatus.findOne({ where: { id } });
+import { TaskStatus, Task, sequelize } from '../models'; //eslint-disable-line
 
 export default (router, { logger }) => {
   router
@@ -29,13 +27,13 @@ export default (router, { logger }) => {
     })
     .get('getTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
       const { id } = ctx.params;
-      const taskStatus = await getTaskStatusById(id);
+      const taskStatus = await TaskStatus.findById(id);
       ctx.render('taskStatuses/edit', { f: buildFormObj(taskStatus), id });
     })
     .patch('editTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
       const { id } = ctx.params;
       const { form } = ctx.request.body;
-      const taskStatus = await getTaskStatusById(id);
+      const taskStatus = await TaskStatus.findById(id);
       logger(`going to change status ${id}: ${taskStatus.name} to ${form.name}`);
       try {
         await taskStatus.update(form);
@@ -46,22 +44,25 @@ export default (router, { logger }) => {
       }
     })
     .delete('deleteTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
-      const totalTaskStatuses = await TaskStatus.count({ where: {} });
-      if (totalTaskStatuses <= 1) {
-        ctx.flash.set('Cannot delete last task status. At least one task status must present');
+      // const totalTaskStatuses = await TaskStatus.count();
+
+      const { id } = ctx.params;
+      if (id === String(1)) {
+        ctx.flash.set('Cannot delete first task status.');
         ctx.redirect(router.url('getTaskStatuses'));
         return;
       }
 
-      const { id } = ctx.params;
-      const taskStatus = await getTaskStatusById(id);
+      const taskStatus = await TaskStatus.findById(id);
       try {
+        const fallbackTaskStatus = await TaskStatus.findById(1);
+        await Task.update({ taskStatusId: 1 }, { where: { taskStatusId: taskStatus.id } });
         await taskStatus.destroy();
-        ctx.flash.set(`Task status ${taskStatus.name} deleted`);
+        ctx.flash.set(`Task status ${taskStatus.name} deleted. Affected tasks status set to '${fallbackTaskStatus.name}'`);
         logger(`Task status deleted ${id}: ${taskStatus.name}`);
       } catch (e) {
         ctx.flash.set(`Task status ${taskStatus.name} NOT deleted!!!`);
-        logger(`Task status NOT deleted ${id}: ${taskStatus.name}`);
+        logger(`Task status NOT deleted ${id}: ${taskStatus.name} reason: ${JSON.stringify(e)}`);
       }
       ctx.redirect(router.url('getTaskStatuses'));
     });
