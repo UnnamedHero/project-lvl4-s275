@@ -40,10 +40,10 @@ export default (router, { logger }) => {
       try {
         await taskStatus.update(form);
         ctx.flash.set('Task status updated');
+        ctx.redirect(router.url('getTaskStatuses'));
       } catch (e) {
-        ctx.flash.set(`Task ${taskStatus.name} NOT updated`);
+        ctx.render('taskStatuses/edit', { f: buildFormObj(taskStatus, e), id });
       }
-      ctx.redirect(router.url('getTaskStatuses'));
     })
     .delete('deleteTaskStatus', '/taskStatuses/:id', ensureLoggedIn, async (ctx) => {
       const totalTaskStatuses = await TaskStatus.count({ where: {} });
