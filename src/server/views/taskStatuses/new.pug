@@ -1,0 +1,7 @@
+extends /layouts/taskStatuses.pug
+
+block taskStatus
+  h4 Add new task status
+  +formFor(f, { url: urlFor('addTaskStatus'), method: 'post' })
+    +input(f, 'name', { required: true })
+    +button(f, 'Add')

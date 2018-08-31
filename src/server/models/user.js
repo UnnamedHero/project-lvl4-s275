@@ -8,7 +8,10 @@ export default (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       unique: true,
       validate: {
-        isEmail: true,
+        isEmail: {
+          arg: true,
+          msg: 'Invalid email address',
+        },
       },
     },
     passwordDigest: {
@@ -35,9 +38,11 @@ export default (sequelize, DataTypes) => {
         return `${this.firstName} ${this.lastName}`;
       },
     },
-    // associate(/* models */) {
-    // associations can be defined here
   });
+  User.associate = (models) => {
+    User.hasMany(models.Task, { foreignKey: 'creatorId' });
+    User.hasMany(models.Task, { foreignKey: 'assignedToId' });
+  };
 
   return User;
 };
