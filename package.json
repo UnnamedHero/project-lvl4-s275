@@ -19,7 +19,10 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules", "/__tests__/helpers/"]
+    "testPathIgnorePatterns": [
+      "/node_modules",
+      "/__tests__/helpers/"
+    ]
   },
   "repository": {
     "type": "git",
