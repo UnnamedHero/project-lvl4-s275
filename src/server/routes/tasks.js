@@ -9,7 +9,7 @@ import makePaginationItems from '../../lib/pagination';
 
 const makeUsersList = (users, currentUserId) => {
   const otherUsers = users
-    .filter(user => String(user.id) !== currentUserId)
+    .filter(user => String(user.id) !== String(currentUserId))
     .map((user) => {
       const { id } = user;
       const name = nameOrEmail(user);
