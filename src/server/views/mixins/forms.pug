@@ -1,5 +1,5 @@
 //- TODO: implement proper form for filter table
-- const getInputName = (f, property) => f.name ? `${f.name}[${property}]` : property
+- const getInputName = (f, property) => f.name !== '' ? `${f.name}[${property}]` : property
 //- TODO: add proper input label naming
 mixin formFor(f, options = {})
   - const url = _.get(options, 'url');
@@ -12,11 +12,11 @@ mixin formFor(f, options = {})
 
 mixin input(f, property, options = { as: 'text', required: false })
   - const value = f.object[property] === undefined ? '' : f.object[property]
-  .form-group(class=(f.errors[property] && 'has-danger'))
+  .form-group
     label= `${property}${options.required ? '*' : ''}`
-    input(name=getInputName(f, property) class='form-control' type=options['as'] value=`${value}` required = options.required)
+    input(name=getInputName(f, property) class=`form-control ${(f.errors[property] && 'is-invalid')}` type=options['as'] value=`${value}` required = options.required)
     if f.errors[property]
-      .form-control-feedback= f.errors[property].map(({ message }) => message).join('. ')
+      .invalid-feedback= f.errors[property].map(({ message }) => message).join('. ')
 
 mixin select(f, property, options = { items: [], required: false })
   - const value = f.object[property] === undefined ? '' : f.object[property]
